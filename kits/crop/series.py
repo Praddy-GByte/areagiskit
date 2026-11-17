@@ -25,7 +25,8 @@ def _read(items, grid):
     ok = np.isin(scl, CLEAR) & grid.mask
     if ok.sum() < 0.02 * grid.mask.sum():
         return None
-    rd = lambda b: warp_s2(items, b, grid)
+    def rd(b):
+        return warp_s2(items, b, grid)
     r, n = rd("B04"), rd("B08")
     with np.errstate(all="ignore"):
         v = (n - r) / (n + r)
@@ -138,16 +139,15 @@ def phenology(S, dates, min_amp=0.20, min_peak=0.50, max_seasons=3, min_rel=0.85
         pk = np.flatnonzero(is_peak[:, c])
         seasons = []
         for p in pk:
-            lo_l = y[:p + 1].min() if p > 0 else y[p]
-            l = int(np.argmin(y[max(0, p - 15):p + 1])) + max(0, p - 15)
+            left = int(np.argmin(y[max(0, p - 15):p + 1])) + max(0, p - 15)
             r = int(np.argmin(y[p:min(T, p + 16)])) + p
-            amp = y[p] - max(y[l], y[r])
+            amp = y[p] - max(y[left], y[r])
             if amp < min_amp:
                 continue
-            base_l, base_r = y[l], y[r]
+            base_l, base_r = y[left], y[r]
             thr_l = base_l + 0.2 * (y[p] - base_l)
             thr_r = base_r + 0.2 * (y[p] - base_r)
-            sos = l + int(np.argmax(y[l:p + 1] >= thr_l))
+            sos = left + int(np.argmax(y[left:p + 1] >= thr_l))
             eos = p + int(np.argmax(y[p:r + 1] <= thr_r)) if (y[p:r + 1] <= thr_r).any() else r
             integ = float(np.clip(y[sos:eos + 1] - min(base_l, base_r), 0, None).sum())
             seasons.append((p, sos, eos, float(y[p]), integ, float(amp)))

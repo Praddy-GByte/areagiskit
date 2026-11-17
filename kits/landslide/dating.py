@@ -45,11 +45,11 @@ def date_scars(m, greenest_prev, prev, cur, thr=-15.0, green_thr=-7.5, keep_bare
     okp = has_g & (n_after >= 1) & (b_after >= keep_bare * np.maximum(n_after, 1))
     nxt = np.where((fin & after).any(0), (fin & after).argmax(0), -1)
     per = []
-    for l, e, o in zip(L, nxt, okp):
+    for last, e, o in zip(L, nxt, okp):
         if not o or e < 0:
             per.append(None)
             continue
-        key = (str(dates[l]), str(dates[e]))
+        key = (str(dates[last]), str(dates[e]))
         out[key] = out.get(key, 0) + 1
         per.append(key)
     return (out, per) if pixels else out

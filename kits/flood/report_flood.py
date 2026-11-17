@@ -45,7 +45,8 @@ def _rgb_png(before, after, mask, title):
     from ...core import maps as M
     if not M.HAVE_MPL:
         return None
-    sc = lambda a: np.clip((np.nan_to_num(a.astype(np.float32), nan=-25) + 25) / 25, 0, 1)
+    def sc(a):
+        return np.clip((np.nan_to_num(a.astype(np.float32), nan=-25) + 25) / 25, 0, 1)
     img = np.dstack([sc(before), sc(after), sc(after)])
     img[~mask] = 1
     step = max(1, int(max(img.shape[:2]) / 1600))
@@ -614,7 +615,7 @@ def build(kit, R, aoi, out_dir, files, layers):
 
     # ------------------------------------------------------------ 4.5b risk and hot spots
     if X.get("risk") is not None:
-        from .extra import RISK, GISTAR
+        from .extra import RISK
         rep.heading("Flood risk (hazard × exposure)")
         rep.text(f"Risk combines where floods are likely ({X['risk_basis']}) with how many people and buildings are there "
                  "(GHS-POP, GHS-BUILT-S). Classes are quantiles of the risk index among places with any risk.")

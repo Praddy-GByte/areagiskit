@@ -19,6 +19,7 @@ from . import models as LM
 from . import stability as ST
 from . import runout as RO
 from . import seismic as SM
+from ...core.net import skipped
 
 MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 
@@ -446,8 +447,8 @@ def build(kit, R, aoi, out_dir, files, layers):
                 from ...core.raster import write_classes
                 import os as _os
                 files.append(write_classes(_os.path.join(out_dir, "hindcast_pre_event_warning.tif"), vis, g, HCL))
-            except Exception:
-                pass
+            except Exception as exc:
+                skipped(exc)
             rep.map(MapSpec(vis, g, "Hindcast of the event", classes=HCL,
                             subtitle=f"Warning zones from landslides seen {yy[0]}–{yy[1]} only; event scars {R['ev']}", source="This study"),
                     "Orange and yellow: what a map made before the event would have flagged. Green: event scars that fell inside it. Red: missed.")

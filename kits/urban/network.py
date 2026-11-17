@@ -20,6 +20,7 @@ from osgeo import ogr
 
 from ...core.data import UA, KitError
 from ...core.osm import ENDPOINTS
+from ...core.net import open_url
 
 ROAD_CLASSES = "motorway|trunk|primary|secondary|tertiary|unclassified|residential|living_street|service|road"
 
@@ -33,7 +34,7 @@ def fetch_roads(bbox, timeout=40, buffer_deg=0.02):
     for ep in ENDPOINTS:
         try:
             req = urllib.request.Request(ep, data=urllib.parse.urlencode({"data": q}).encode(), headers={"User-Agent": UA})
-            with urllib.request.urlopen(req, timeout=timeout + 15) as r:
+            with open_url(req, timeout=timeout + 15) as r:
                 d = json.load(r)
             return [[(p["lon"], p["lat"]) for p in e.get("geometry", [])] for e in d.get("elements", []) if e.get("geometry")]
         except Exception as exc:  # noqa: BLE001

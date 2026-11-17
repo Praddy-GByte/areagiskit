@@ -33,6 +33,7 @@ from .lulc import annual as AN
 from .lulc import compare as CP
 from .lulc import userdata as UD
 from .lulc.composite import INDEX_INFO, composite, features
+from ..core.net import skipped
 
 CL = C.CLASSES
 LEI_CLASSES = {1: ("Infilling", "#7a1414"), 2: ("Edge-expansion", "#e0633a"), 3: ("Outlying (leapfrog)", "#f2c14e")}
@@ -61,7 +62,8 @@ def _months(s):
         return list(range(1, 13))
     try:
         m = sorted({int(x) for x in s.split(",") if x.strip()})
-        assert m and all(1 <= v <= 12 for v in m)
+        if not m or not all(1 <= v <= 12 for v in m):
+            raise ValueError("months must be numbers from 1 to 12")
         return m
     except Exception:
         raise KitError("Months must be 'all' or numbers 1–12 separated by commas.")
@@ -145,7 +147,8 @@ class LULCStudyKit(Kit):
         latest = years[-1]
         jrc = D.water_occurrence(grid)
         if user:
-            near = lambda y0_: min(years, key=lambda yy: abs(yy - y0_))
+            def near(y0_):
+                return min(years, key=lambda yy: abs(yy - y0_))
             upts = [(r_, c_, k_, near(y_) if y_ is not None else None) for r_, c_, k_, y_ in upts]
             pyears = UD.point_years(upts, latest)
             built_l2 = [k for k, v in classes_l2.items() if v[2] == 2]
@@ -214,8 +217,8 @@ class LULCStudyKit(Kit):
             raw = warp_items(items, "map", grid, resample="mode", dtype=gdal.GDT_Byte, src_nodata=0, dst_nodata=0)
             wc = C._lut(C.WC_TO)[raw]
             wc[~grid.mask] = 0
-        except Exception:
-            pass
+        except Exception as exc:
+            skipped(exc)
         map_checks = []
         ref_y = C.REF_YEAR if C.REF_YEAR in res else min(years, key=lambda yy: abs(yy - C.REF_YEAR))
         m21 = maps[ref_y] if ref_y in maps else res[ref_y]["map"]
@@ -590,7 +593,8 @@ class LULCStudyKit(Kit):
         rep = Report(self.NAME, f"Land use / land cover change {y0}–{latest}", aoi.name, R["verdict"], "#2f5d50", aoi, g)
         classes_all = {c: CL[c] for c in present}
         missing = {(y, k) for y in years for k, how in R["res"][y].get("notes", []) if how.startswith("not")}
-        A = lambda y, c: "n/m" if (y, c) in missing else fmt(areas[y][c])
+        def A(y, c):
+            return "n/m" if (y, c) in missing else fmt(areas[y][c])
 
         # ------------------------------------------------ summary
         d = {c: areas[latest][c] - areas[y0][c] for c in present}

@@ -19,6 +19,7 @@ import urllib.request
 
 import numpy as np
 from osgeo import gdal
+from .net import open_url
 
 gdal.UseExceptions()
 
@@ -113,7 +114,7 @@ def get_json(url, body=None, timeout=60, tries=4, cache=None):
         try:
             req = urllib.request.Request(url, data=data, headers={
                 "Content-Type": "application/json", "User-Agent": UA, "Accept": "application/json"})
-            with urllib.request.urlopen(req, timeout=timeout) as r:
+            with open_url(req, timeout=timeout) as r:
                 obj = json.loads(r.read().decode("utf-8"))
             if use_cache:
                 _cache_put(url, obj)
@@ -148,7 +149,7 @@ def search(collection, bbox, start, end, query=None, max_items=500):
     while True:
         d = get_json(url, b)
         out.extend(d.get("features", []))
-        nxt = [l for l in d.get("links", []) if l.get("rel") == "next"]
+        nxt = [lk for lk in d.get("links", []) if lk.get("rel") == "next"]
         if not nxt or len(out) >= max_items:
             break
         n = nxt[0]
@@ -290,7 +291,7 @@ def warp_items(items, asset, grid, **kw):
 def exists(url):
     try:
         req = urllib.request.Request(url, method="HEAD", headers={"User-Agent": UA})
-        with urllib.request.urlopen(req, timeout=20) as r:
+        with open_url(req, timeout=20) as r:
             return r.status == 200
     except Exception:
         return False

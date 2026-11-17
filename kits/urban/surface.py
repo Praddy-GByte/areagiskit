@@ -11,6 +11,7 @@ from osgeo import gdal
 
 from ...core.data import trace, vsi, warp
 from . import heat as HT
+from ...core.net import skipped
 
 CREDIT_LCZ = ("Demuzere, M. et al. (2022). A global map of local climate zones to support earth system modelling and urban-scale "
               "environmental science. Earth System Science Data 14, 3835–3873. Map v3 on Zenodo (doi:10.5281/zenodo.8419340), CC BY 4.0.")
@@ -56,7 +57,8 @@ def season_albedo(grid, year, months, dates):
         if d in by:
             try:
                 arrs.append(_scene_albedo(by[d], grid))
-            except Exception:
+            except Exception as exc:
+                skipped(exc)
                 continue
     if not arrs:
         return None

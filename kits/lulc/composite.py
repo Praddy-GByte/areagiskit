@@ -114,7 +114,6 @@ def composite(aoi, grid, year, months, progress=None, max_cloud=60, max_dates=16
         with ThreadPoolExecutor(max_workers=6) as ex:
             stack = np.stack([x if x is not None else np.full(grid.shape, np.nan, np.float32)
                               for x in ex.map(one, range(n))])
-        import warnings
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", RuntimeWarning)
             out[b] = np.nanmedian(stack, axis=0)

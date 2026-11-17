@@ -630,7 +630,8 @@ class CropStudyKit(Kit):
             with open(p, "w", encoding="utf-8") as fh:
                 fh.write("year,month,root_zone_wetness,surface_wetness,root_zone_z,surface_z\n")
                 for (y, m), d in sorted(R["sm"]["monthly"].items()):
-                    f_ = lambda v: "" if v is None else f"{v:.3f}"
+                    def f_(v):
+                        return "" if v is None else f"{v:.3f}"
                     fh.write(f"{y},{m},{f_(d.get('root'))},{f_(d.get('top'))},{f_(za_.get((y, m)))},{f_(zt_.get((y, m)))}\n")
             files.append(p)
         if R.get("spi"):

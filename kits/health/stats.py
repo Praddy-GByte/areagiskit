@@ -25,9 +25,9 @@ def byar_ci(c, p, per=1e5):
         if not np.isfinite(n) or n <= 0:
             lo[i] = hi[i] = np.nan
             continue
-        l = 0.0 if x == 0 else x * (1 - 1 / (9 * x) - 1.96 / (3 * math.sqrt(x))) ** 3
+        low = 0.0 if x == 0 else x * (1 - 1 / (9 * x) - 1.96 / (3 * math.sqrt(x))) ** 3
         u = (x + 1) * (1 - 1 / (9 * (x + 1)) + 1.96 / (3 * math.sqrt(x + 1))) ** 3
-        lo[i], hi[i] = l / n * per, u / n * per
+        lo[i], hi[i] = low / n * per, u / n * per
     return lo, hi
 
 
@@ -97,12 +97,12 @@ def morans_i(x, nbrs, perms=999, seed=1):
     if S0 == 0:
         return None, None
 
-    def I(zz):
+    def morans_i(zz):
         lag = np.array([zz[v].mean() if len(v) else 0.0 for v in N])
         return (n / S0) * (zz * lag).sum() / (zz ** 2).sum()
-    obs = I(z)
+    obs = morans_i(z)
     rng = np.random.default_rng(seed)
-    sims = np.array([I(rng.permutation(z)) for _ in range(perms)])
+    sims = np.array([morans_i(rng.permutation(z)) for _ in range(perms)])
     p = (np.sum(sims >= obs) + 1) / (perms + 1)
     return float(obs), float(p)
 

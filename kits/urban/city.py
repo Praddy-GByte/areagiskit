@@ -14,6 +14,7 @@ import numpy as np
 from osgeo import gdal
 
 from ...core.data import UA, item_date, search, trace, vsi, warp
+from ...core.net import open_url, skipped
 
 HRSL = "https://dataforgood-fb-data.s3.amazonaws.com/hrsl-cogs/hrsl_general/hrsl_general-latest.vrt"
 CREDIT_HRSL = ("Population: Meta (Facebook) Data for Good & CIESIN, High Resolution Settlement Layer / population density maps "
@@ -167,7 +168,8 @@ def no2(aoi, grid_c, days=24, months_back=12, progress=None):
         try:
             items = [it for it in search("sentinel-5p-l2-netcdf", aoi.bbox, str(d), str(d + dt.timedelta(days=3)), max_items=60)
                      if it["properties"].get("s5p:product_name") == "no2" and it["properties"].get("s5p:processing_mode") == "NRTI"]
-        except Exception:
+        except Exception as exc:
+            skipped(exc)
             continue
         if not items:
             continue
@@ -177,15 +179,17 @@ def no2(aoi, grid_c, days=24, months_back=12, progress=None):
         fn = os.path.join(tmp, "g.nc")
         try:
             req = urllib.request.Request(url, headers={"User-Agent": UA})
-            with urllib.request.urlopen(req, timeout=120) as r, open(fn, "wb") as fh:
+            with open_url(req, timeout=120) as r, open(fn, "wb") as fh:
                 while True:
                     b = r.read(1 << 20)
                     if not b:
                         break
                     fh.write(b)
-            rd = lambda v: gdal.Open(f'NETCDF:"{fn}":/PRODUCT/{v}').ReadAsArray().astype(np.float64)
+            def rd(v):
+                return gdal.Open(f'NETCDF:"{fn}":/PRODUCT/{v}').ReadAsArray().astype(np.float64)
             lat, lon, val, qa = rd("latitude"), rd("longitude"), rd("nitrogendioxide_tropospheric_column"), rd("qa_value")
-        except Exception:
+        except Exception as exc:
+            skipped(exc)
             continue
         finally:
             try:

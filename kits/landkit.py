@@ -197,7 +197,8 @@ class LandKit(Kit):
                   "The ten largest land cover conversions", [D.LULC[f][1] for (f, t), _ in top[:10]])
         vrows = []
         if agree is not None:
-            pc = lambda x: "–" if x is None else f"{x * 100:.0f}%"
+            def pc(x):
+                return "–" if x is None else f"{x * 100:.0f}%"
             vrows.append(("Independent map (ESA WorldCover 2021)", f"{round(agree * 100)}% of pixels agree",
                           "Different team, different method. Built area, water, trees and crops agree best; rangeland and shrubs are defined differently."))
             for k, (sh, x, y) in per.items():

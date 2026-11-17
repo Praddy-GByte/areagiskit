@@ -13,6 +13,7 @@ from osgeo import gdal, ogr
 
 from ...core.raster import neighbours
 from ...core.data import warp_s2
+from ...core.net import skipped
 
 
 # ------------------------------------------------------------------ connected components (GDAL, no SciPy)
@@ -254,7 +255,8 @@ def crop_ndvi_change(aoi, grid, peak, crop, flood, search, warp_items, item_date
             try:
                 scl = warp_items(its, "SCL", grid, resample="near", dtype=gdal.GDT_Byte, src_nodata=0, dst_nodata=0)
                 r, n = warp_s2(its, "B04", grid), warp_s2(its, "B08", grid)
-            except Exception:
+            except Exception as exc:
+                skipped(exc)
                 continue
             nd = (n - r) / (n + r)
             nd[~np.isin(scl, [4, 5])] = np.nan

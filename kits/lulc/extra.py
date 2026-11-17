@@ -11,6 +11,7 @@ import numpy as np
 from osgeo import gdal, osr
 
 from ...core.data import trace, warp
+from ...core.net import skipped
 
 # ======================================================================= population / SDG 11.3.1
 
@@ -297,7 +298,8 @@ def gradient_metrics(cmap, ring, grid, classes, metrics_fn, min_px=500):
         m = np.where(sel, cmap, 0).astype(np.uint8)
         try:
             cls, land = metrics_fn(m, grid, classes)
-        except Exception:
+        except Exception as exc:
+            skipped(exc)
             continue
         rows.append(dict(ring=k, built=cls.get(2, {}).get("PLAND", 0.0), PD=land["PD"], ED=land["ED"],
                          SHDI=land["SHDI"], LPI=land["LPI"]))

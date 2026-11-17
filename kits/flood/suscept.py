@@ -251,9 +251,9 @@ def vif(X, keys):
     out = {}
     for j, k in enumerate(keys):
         y = X[:, j]
-        O = np.column_stack([np.ones(len(X)), np.delete(X, j, axis=1)])
-        beta, *_ = np.linalg.lstsq(O, y, rcond=None)
-        res = y - O @ beta
+        others = np.column_stack([np.ones(len(X)), np.delete(X, j, axis=1)])
+        beta, *_ = np.linalg.lstsq(others, y, rcond=None)
+        res = y - others @ beta
         r2 = 1 - res.var() / max(y.var(), 1e-12)
         out[k] = 1 / max(1 - r2, 1e-6)
     return out

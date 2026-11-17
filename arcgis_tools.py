@@ -218,15 +218,17 @@ def make_tool(kit_cls):
                     for spec in reversed(res.get("layers", [])):
                         try:
                             m.addDataFromPath(spec["path"])
-                        except Exception:
-                            pass
+                        except Exception as exc:
+                            messages.addMessage(f"Could not add {os.path.basename(spec['path'])} to the map: {exc}")
             except Exception:
                 messages.addMessage("Results were not added to a map (no active map). They are in: " + os.path.dirname(res["report"]))
-            if V[OPEN].value and os.name == "nt":
+            if V[OPEN].value:
                 try:
-                    os.startfile(res["report"])
-                except Exception:
-                    pass
+                    import pathlib
+                    import webbrowser
+                    webbrowser.open(pathlib.Path(res["report"]).resolve().as_uri())
+                except Exception as exc:
+                    messages.addMessage(f"Open the report yourself: {res['report']} ({exc})")
             return
 
     Tool.__name__ = f"{kit_cls.__name__}Tool"

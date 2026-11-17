@@ -82,12 +82,12 @@ def morans_i(x, nbrs, perms=499, seed=1):
     if W == 0:
         return None, None
 
-    def I(zz):
+    def morans_i(zz):
         return (n / W) * sum(zz[i] * zz[list(nbrs[i])].sum() for i in range(n) if nbrs[i]) / (zz ** 2).sum()
 
-    obs = I(z)
+    obs = morans_i(z)
     rng = np.random.default_rng(seed)
-    sims = np.array([I(rng.permutation(z)) for _ in range(perms)])
+    sims = np.array([morans_i(rng.permutation(z)) for _ in range(perms)])
     p = (np.sum(sims >= obs) + 1) / (perms + 1)
     return float(obs), float(p)
 

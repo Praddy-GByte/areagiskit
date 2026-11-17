@@ -12,6 +12,7 @@ import numpy as np
 from osgeo import gdal
 
 from ...core.data import item_date, search, trace, vsi, warp
+from ...core.net import skipped
 
 CREDIT_MODIS_LST = ("MODIS Land Surface Temperature MOD11A1/MOD11A2 and MYD11A2 v6.1 (1 km, Terra 10:30/22:30, Aqua 13:30/01:30), "
                     "NASA LP DAAC, via Microsoft Planetary Computer.")
@@ -99,7 +100,8 @@ def yearly_suhi(aoi, grid_c, urban_c, rural_c, months, years, n=3, progress=None
             progress(i, len(years), y)
         try:
             lst, dates, _ = season_lst(grid_c, y, months, n=n, min_valid=0.5)
-        except Exception:
+        except Exception as exc:
+            skipped(exc)
             continue
         if lst is None:
             continue

@@ -2,7 +2,7 @@
 name=AreaGIS Kit
 qgisMinimumVersion=3.22
 description=Open-source research workflow for QGIS: data acquisition, standard analyses, independent validation, confidence grading and a reproducible report in one run (all six kits in one plugin).
-version=0.14.0
+version=0.14.1
 author=Pradeepika Kaushik
 email=pradeepika.kaushik@gmail.com
 about=AreaGIS Kit with all six kits (Flood, LULC, Landslide, Crop, Urban, Health) in one plugin. The same kits are also published as six separate plugins. Pick an area, set one or two options and run: open data is fetched for your area (no account, no manual download), the standard analyses run, results are checked against independent data, confidence is graded, and a reproducible HTML, Word and PDF report is written.

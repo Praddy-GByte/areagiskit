@@ -12,6 +12,7 @@ import numpy as np
 from osgeo import ogr
 
 from ...core.data import UA, trace
+from ...core.net import open_url
 
 GEM = "https://raw.githubusercontent.com/GEMScienceTools/gem-global-active-faults/master/geojson/gem_active_faults_harmonized.geojson"
 CREDIT_GEM = ("Active faults: GEM Global Active Faults Database (Styron & Pagani 2020, Earthquake Spectra 36, 160–180), "
@@ -24,7 +25,7 @@ def _gem():
     p = os.path.join(CACHE, "gem_active_faults.geojson")
     if not os.path.exists(p) or os.path.getsize(p) < 1_000_000:
         req = urllib.request.Request(GEM, headers={"User-Agent": UA})
-        with urllib.request.urlopen(req, timeout=180) as r, open(p + ".part", "wb") as fh:
+        with open_url(req, timeout=180) as r, open(p + ".part", "wb") as fh:
             fh.write(r.read())
         os.replace(p + ".part", p)
     trace(url=GEM, label="gem-active-faults")
@@ -60,7 +61,7 @@ def fault_distance(grid, search_km=50):
             y = grid.gt[3] - (r + 0.5) * grid.res
             pt = ogr.Geometry(ogr.wkbPoint)
             pt.AddPoint_2D(x, y)
-            best = min(best, min(l.Distance(pt) for l in lines))
+            best = min(best, min(ln.Distance(pt) for ln in lines))
         out = np.full(grid.shape, best, np.float32)
         out[~grid.mask] = np.nan
         return out, [n for n in names if n]

@@ -16,13 +16,14 @@ At 5.5 km a hazard grid only varies across larger study areas, so the factor is 
 
 import datetime as dt
 import math
+import re
 import urllib.parse
-import xml.etree.ElementTree as ET
 
 import numpy as np
 from osgeo import gdal
 
-from ...core.data import get_json, trace, warp
+from ...core.data import UA, get_json, trace, warp
+from ...core.net import open_url
 
 GEM_ZIP = "https://zenodo.org/records/8409647/files/GEM-GSHM_PGA-475y-rock_v2023.zip?download=1"
 GEM_TIF = "v2023_1_pga_475_rock_3min.tif"
@@ -81,17 +82,30 @@ def find_shakemap(event_date, bbox, days_before=3, days_after=1, min_mag=5.0, ra
                 detail=p.get("detail"), url=p.get("url"), lon=f["geometry"]["coordinates"][0], lat=f["geometry"]["coordinates"][1])
 
 
+def _attrs(text):
+    return dict(re.findall(r'([A-Za-z_]+)="([^"]*)"', text))
+
+
 def parse_grid_xml(text):
-    """ShakeMap grid.xml -> (lon0, lat_top, dlon, dlat, PGA array in g, top row first)."""
-    root = ET.fromstring(text)
-    ns = {"s": root.tag.split("}")[0].strip("{")} if root.tag.startswith("{") else {}
-    tag = (lambda t: f"s:{t}") if ns else (lambda t: t)
-    spec = root.find(tag("grid_specification"), ns)
-    nlon, nlat = int(spec.get("nlon")), int(spec.get("nlat"))
-    lon_min, lat_max = float(spec.get("lon_min")), float(spec.get("lat_max"))
-    dlon, dlat = float(spec.get("nominal_lon_spacing")), float(spec.get("nominal_lat_spacing"))
-    fields = {f.get("name").upper(): int(f.get("index")) - 1 for f in root.findall(tag("grid_field"), ns)}
-    data = np.array(root.find(tag("grid_data"), ns).text.split(), float).reshape(-1, len(fields))
+    """ShakeMap grid.xml -> (lon0, lat_top, dlon, dlat, PGA array in g, top row first).
+
+    Read with regular expressions rather than an XML parser: the layout is fixed, and documents that declare
+    entities or a DOCTYPE are refused, so nothing in the file can make the reader fetch or expand anything.
+    """
+    if isinstance(text, bytes):
+        text = text.decode("utf-8", "replace")
+    if "<!DOCTYPE" in text or "<!ENTITY" in text:
+        raise ValueError("ShakeMap grid.xml with a DOCTYPE or entities is not accepted")
+    spec = _attrs(re.search(r"<(?:\w+:)?grid_specification\b([^>]*)>", text).group(1))
+    nlon, nlat = int(spec["nlon"]), int(spec["nlat"])
+    lon_min, lat_max = float(spec["lon_min"]), float(spec["lat_max"])
+    dlon, dlat = float(spec["nominal_lon_spacing"]), float(spec["nominal_lat_spacing"])
+    fields = {}
+    for tag in re.findall(r"<(?:\w+:)?grid_field\b([^>]*)>", text):
+        a = _attrs(tag)
+        fields[a["name"].upper()] = int(a["index"]) - 1
+    body = re.search(r"<(?:\w+:)?grid_data\b[^>]*>(.*?)</(?:\w+:)?grid_data>", text, re.S).group(1)
+    data = np.array(body.split(), float).reshape(-1, len(fields))
     pga = data[:, fields["PGA"]] / 100.0                 # %g -> g
     lon, lat = data[:, fields["LON"]], data[:, fields["LAT"]]
     col = np.rint((lon - lon_min) / dlon).astype(int)
@@ -114,8 +128,8 @@ def event_pga(grid, ev):
         return None
     url = c["url"]
     trace(url=url, label=f"usgs-shakemap-{ev['id']}")
-    req = urllib.request.Request(url, headers={"User-Agent": "QGIS-Study-Kits (open-source QGIS plugin)"})
-    with urllib.request.urlopen(req, timeout=120) as r:
+    req = urllib.request.Request(url, headers={"User-Agent": UA})
+    with open_url(req, timeout=120) as r:
         lon0, lat1, dlon, dlat, a = parse_grid_xml(r.read())
     drv = gdal.GetDriverByName("MEM").Create("", a.shape[1], a.shape[0], 1, gdal.GDT_Float32)
     drv.SetGeoTransform((lon0 - dlon / 2, dlon, 0, lat1 + dlat / 2, 0, -dlat))

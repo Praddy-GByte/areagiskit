@@ -56,7 +56,7 @@ def _search(aoi, start, end):
     while url:
         d = get_json(url, timeout=90)
         out += d.get("features", [])
-        url = next((l["href"] for l in d.get("links", []) if l.get("rel") == "next"), None)
+        url = next((lk["href"] for lk in d.get("links", []) if lk.get("rel") == "next"), None)
         pages += 1
         if pages > 100:
             break

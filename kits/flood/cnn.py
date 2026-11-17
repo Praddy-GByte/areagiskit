@@ -26,7 +26,8 @@ def _weights():
 
 def features(vv, vh, vv_ly, vh_ly, vv_pre, vh_pre, hand, slope, ens, dlr, tuw, lst, like, excl, occ, wc, valid):
     """Same channel order and scaling as validation/floodbench/prep.py."""
-    z = lambda a: np.nan_to_num(a, nan=0.0).astype(np.float32)
+    def z(a):
+        return np.nan_to_num(a, nan=0.0).astype(np.float32)
     ly = vv_ly if (vv_ly is not None and np.isfinite(vv_ly).any()) else vv_pre
     lyh = vh_ly if (vh_ly is not None and np.isfinite(vh_ly).any()) else vh_pre
     pr = vv_pre if (vv_pre is not None and np.isfinite(vv_pre).any()) else ly

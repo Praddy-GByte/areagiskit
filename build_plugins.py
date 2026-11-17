@@ -19,7 +19,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 SRC = os.environ.get("KITS_SRC") or (HERE if os.path.basename(HERE) == "areagiskit" else os.path.join(HERE, "areagiskit"))
 DIST = os.environ.get("KITS_DIST") or os.path.join(os.path.dirname(SRC), "dist")
 OUT = os.environ.get("KITS_OUT") or os.path.join(os.path.dirname(SRC), "plugins")
-VERSION = "0.14.0"
+VERSION = "0.14.1"
 AUTHOR = "Pradeepika Kaushik"
 GH = "https://github.com/Praddy-GByte"
 
@@ -212,7 +212,7 @@ experimental=True
 hasProcessingProvider=yes
 deprecated=False
 license=GPL-3.0-or-later
-changelog={VERSION}: AreaGIS Kit release. Landslide hindcast; Sentinel-2 duplicate-tile fix; recovery test for landslide scars; privacy rule for small case counts; projection stops if its hindcast fails; every report opens with what it cannot tell you.
+changelog={VERSION}: Safer downloads (http and https only), no silent error handling, ShakeMap read without an XML library, code tidy-up. 0.14.0: AreaGIS Kit release. Landslide hindcast; Sentinel-2 duplicate-tile fix; recovery test for landslide scars; privacy rule for small case counts; projection stops if its hindcast fails; every report opens with what it cannot tell you.
 """
 
 

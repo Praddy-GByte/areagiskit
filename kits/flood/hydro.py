@@ -18,6 +18,7 @@ import json
 import numpy as np
 
 from ...core.data import UA, trace
+from ...core.net import open_url
 
 POWER = "https://power.larc.nasa.gov/api/temporal/daily/point"
 FLOODAPI = "https://flood-api.open-meteo.com/v1/flood"
@@ -33,7 +34,7 @@ def _get(url, timeout=90):
         time.sleep(wait)
         try:
             req = urllib.request.Request(url, headers={"User-Agent": UA})
-            with urllib.request.urlopen(req, timeout=timeout) as r:
+            with open_url(req, timeout=timeout) as r:
                 return json.load(r)
         except Exception as e:      # free APIs answer 429 when many requests come from one address
             if "429" not in str(e) or i == 2:

@@ -9,6 +9,7 @@ contours, and the two-step floating catchment area (2SFCA) accessibility index. 
 import math
 
 import numpy as np
+from ...core.net import skipped
 
 
 # ------------------------------------------------------------------ GWPR
@@ -98,7 +99,8 @@ def gwpr(y, X, off, coords, candidates=None):
     for c in candidates:
         try:
             fits[c] = gwpr_fit(y, X, off, coords, c)
-        except Exception:
+        except Exception as exc:
+            skipped(exc)
             continue
     if not fits:
         return None

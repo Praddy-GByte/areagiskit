@@ -29,6 +29,7 @@ from .flood import hydro as HY
 from .lulc import extra as LX
 from .urban import city as CT
 from .urban import heat as HT
+from ..core.net import skipped
 
 HVI = {1: ("Very low", "#1a9850"), 2: ("Low", "#91cf60"), 3: ("Medium", "#fee08b"), 4: ("High", "#fc8d59"), 5: ("Very high", "#d73027")}
 UTFVI = {1: ("Excellent (none)", "#1a9850"), 2: ("Good (weak)", "#91cf60"), 3: ("Normal (middle)", "#fee08b"),
@@ -68,7 +69,8 @@ class UrbanStudyKit(Kit):
         today = dt.date.today()
         try:
             months = [int(x) for x in str(params.get("hot_months") or "4,5,6").split(",") if x.strip()]
-            assert months and all(1 <= m <= 12 for m in months)
+            if not months or not all(1 <= m <= 12 for m in months):
+                raise ValueError("months must be numbers from 1 to 12")
         except Exception:
             raise KitError("Hot-season months must be numbers 1–12 separated by commas, e.g. 4,5,6.")
         year = int(params.get("year") or 0)
@@ -175,7 +177,8 @@ class UrbanStudyKit(Kit):
                 self.step(34 + 12 * i / len(yrs), f"Heat island trend: MODIS {y}")
                 try:
                     ms = HT.modis_season(gk, y, months, platforms=("aqua",))
-                except Exception:
+                except Exception as exc:
+                    skipped(exc)
                     continue
                 row = {}
                 for v, a in ms.items():
@@ -244,13 +247,14 @@ class UrbanStudyKit(Kit):
                                          float((tree10 & wt).sum() / max(wt.sum(), 1) * 100))
                     kb = 10   # 100 m blocks: pixel-exact overlap is harsh for scattered trees and 2021 vs today
                     rr, cc = (g10.shape[0] // kb) * kb, (g10.shape[1] // kb) * kb
-                    bl = lambda x: x[:rr, :cc].reshape(rr // kb, kb, cc // kb, kb).mean((1, 3))
+                    def bl(x):
+                        return x[:rr, :cc].reshape(rr // kb, kb, cc // kb, kb).mean((1, 3))
                     m10 = bl(g10.mask.astype(np.float32)) > 0.9
                     A_, B_ = bl(tree10.astype(np.float32))[m10], bl(wt.astype(np.float32))[m10]
                     if A_.size >= 30 and A_.std() > 0 and B_.std() > 0:
                         R["canopy_block"] = (float(np.corrcoef(A_, B_)[0, 1]), float(np.mean(np.abs(A_ - B_)) * 100))
-            except Exception:
-                pass
+            except Exception as exc:
+                skipped(exc)
         if tree10 is not None:
             G = CT.green_metrics(tree10, green10, g10, g, pop, urban, built)
             R["green"] = G
@@ -632,7 +636,8 @@ class UrbanStudyKit(Kit):
             fh.write("year,modis_day_suhi_C,modis_night_suhi_C,landsat_suhi_C\n")
             tr, lt = R.get("modis_trend") or {}, R.get("landsat_trend") or {}
             for y in sorted(set(tr) | set(lt)):
-                f = lambda v: "" if v is None else f"{v:.2f}"
+                def f(v):
+                    return "" if v is None else f"{v:.2f}"
                 fh.write(f"{y},{f(tr.get(y, {}).get('Day'))},{f(tr.get(y, {}).get('Night'))},{f(lt.get(y, {}).get('suhi'))}\n")
         files.append(p)
         p = os.path.join(out_dir, "temperature_by_land_cover.csv")

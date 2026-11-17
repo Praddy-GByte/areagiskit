@@ -117,9 +117,9 @@ def bivariate(T, C, mask):
         pij = frs / max(frs.sum(), 1e-12)
         H = -np.sum(pij[pij > 0] * np.log2(pij[pij > 0]))
         Hmax = np.log2(max(len(frs), 2))
-        I = (Hmax - H) / Hmax
-        W = I * frs.mean()
-        stats[key] = dict(entropy_weight=float(W), info=float(I), fr_range=float(frs.max() - frs.min()) if len(frs) else 0)
+        info = (Hmax - H) / Hmax
+        W = info * frs.mean()
+        stats[key] = dict(entropy_weight=float(W), info=float(info), fr_range=float(frs.max() - frs.min()) if len(frs) else 0)
         c = C[key]
         n = int(c.max()) + 1
         for name, lut in (("fr", lut_fr), ("iv", lut_iv), ("woe", lut_w)):

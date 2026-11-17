@@ -18,6 +18,7 @@ import numpy as np
 from osgeo import ogr, osr
 
 from ...core.data import UA, get_json, trace
+from ...core.net import open_url, skipped
 
 API = "https://rapidmapping.emergency.copernicus.eu/backend/dashboard-api/"
 CREDIT_EMS = ("Copernicus Emergency Management Service (© European Union), Rapid Mapping delineation products "
@@ -46,7 +47,8 @@ def find(aoi, date=None, days=40, max_km=400):
             continue
         try:
             px, py = [float(v) for v in a["centroid"].split("(")[1].rstrip(")").split()]
-        except Exception:
+        except Exception as exc:
+            skipped(exc)
             continue
         dkm = math.hypot((px - cx) * 111 * math.cos(math.radians(cy)), (py - cy) * 111)
         if dkm > max_km:
@@ -90,7 +92,7 @@ def load(product, grid, workdir=None):
     os.makedirs(workdir, exist_ok=True)
     path = os.path.join(workdir, os.path.basename(product["url"]))
     req = urllib.request.Request(product["url"], headers={"User-Agent": UA})
-    with urllib.request.urlopen(req, timeout=180) as r, open(path, "wb") as fh:
+    with open_url(req, timeout=180) as r, open(path, "wb") as fh:
         fh.write(r.read())
     trace(url=product["url"], label="copernicus-ems")
     from osgeo import gdal

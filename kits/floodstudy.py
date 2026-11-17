@@ -39,6 +39,7 @@ from .lulc.classify import CREDIT_GHSL, ghsl_fraction
 from .lulc.compare import CREDIT_SOIL, SOILGRIDS
 from .lulc.extra import CREDIT_POP, population
 from .lulc.models import auc
+from ..core.net import skipped
 
 FV = {1: ("Possible flood under trees / crops", "#1b7837"), 2: ("Possible flood in built-up area", "#762a83")}
 SAFE = {1: ("Safe high ground (never flooded, ≥ 1 m above nearby flood)", "#1a9850"), 2: ("Flood water (event maximum)", "#1f6fd1"),
@@ -677,16 +678,18 @@ class FloodStudyKit(Kit):
         for a in acts[:3]:
             try:
                 prods = EMS.products(a["code"], aoi)
-            except Exception:
+            except Exception as exc:
+                skipped(exc)
                 continue
             if prods:
                 top = max(p["share"] for p in prods)
                 prods = [p for p in prods if p["share"] >= max(0.02, 0.5 * top)]
                 ref_t = _d(R["peak"]["date"])
-                def gap(p):
+                def days_from_peak(p):
                     return abs((_d(p["time"][:10]) - ref_t).days) if p.get("time") else 99
                 # prefer images from another satellite than Sentinel-1 (fully independent of GFM), then the closest date
-                prods.sort(key=lambda p: (gap(p) > 3, str(p.get("sensor") or "").startswith("Sentinel-1"), gap(p)))
+                prods.sort(key=lambda p: (days_from_peak(p) > 3, str(p.get("sensor") or "").startswith("Sentinel-1"),
+                                          days_from_peak(p)))
             for p in prods[:2]:
                 try:
                     ref, inside = EMS.load(p, EG, workdir=os.path.join(out_dir, "_ems"))
@@ -977,7 +980,8 @@ class FloodStudyKit(Kit):
             try:
                 b, _ = ghsl_fraction(HG, yr)
                 pp, _ = population(HG, yr if yr < 2020 else 2025)
-            except Exception:
+            except Exception as exc:
+                skipped(exc)
                 continue
             if b is None and pp is None:
                 continue

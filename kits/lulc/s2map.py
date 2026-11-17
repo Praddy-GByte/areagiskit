@@ -14,6 +14,7 @@ from ...core import datasets as D
 from ...core.aoi import Grid
 from ...core.data import item_date, search, warp_items, warp_s2
 from . import classify as C
+from ...core.net import skipped
 
 BANDS = ("B02", "B03", "B04", "B08", "B11", "B12")
 IO_LAST = 2023
@@ -25,7 +26,8 @@ def _composite(aoi, grid, year, max_cloud=50, max_scenes=10):
     days = {}
     for it in items:
         days.setdefault(item_date(it), []).append(it)
-    cc = lambda kv: np.mean([i["properties"]["eo:cloud_cover"] for i in kv[1]])
+    def cc(kv):
+        return np.mean([i["properties"]["eo:cloud_cover"] for i in kv[1]])
     # spread through the year: clearest scene of each month first, then the next clearest
     best = {}
     for kv in sorted(days.items(), key=cc):
@@ -44,7 +46,8 @@ def _composite(aoi, grid, year, max_cloud=50, max_scenes=10):
                 a = warp_s2(its, b, grid)
                 a[~ok] = np.nan
                 got[b] = a.astype(np.float32)
-        except Exception:
+        except Exception as exc:
+            skipped(exc)
             continue
         for b in BANDS:
             stacks[b].append(got[b])
@@ -74,8 +77,10 @@ def s2_lulc(aoi, year, progress=None):
     if comp is None:
         return None
     step(0.45, "Training labels where IO/Esri and WorldCover agree")
-    io_items = lambda y: [i for i in search("io-lulc-annual-v02", aoi.bbox, f"{y}-01-01", f"{y}-12-31") if item_date(i)[:4] == str(y)]
-    rd_io = lambda y: C._lut(C.IO_TO)[warp_items(io_items(y), "data", grid, resample="mode", dtype=gdal.GDT_Byte, src_nodata=0, dst_nodata=0)]
+    def io_items(y):
+        return [i for i in search("io-lulc-annual-v02", aoi.bbox, f"{y}-01-01", f"{y}-12-31") if item_date(i)[:4] == str(y)]
+    def rd_io(y):
+        return C._lut(C.IO_TO)[warp_items(io_items(y), "data", grid, resample="mode", dtype=gdal.GDT_Byte, src_nodata=0, dst_nodata=0)]
     io21, io23 = rd_io(2021), rd_io(IO_LAST)
     wc = C._lut(C.WC_TO)[warp_items(search("esa-worldcover", aoi.bbox, "2021-01-01", "2021-12-31"), "map", grid,
                                     resample="mode", dtype=gdal.GDT_Byte, src_nodata=0, dst_nodata=0)]

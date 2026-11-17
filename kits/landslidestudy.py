@@ -36,6 +36,7 @@ from .lulc.classify import ghsl_fraction
 from .lulc.compare import SOILGRIDS
 from .lulc.extra import population
 from .lulc.models import auc
+from ..core.net import skipped
 
 SUSC = {1: ("Very low", "#2f7a4d"), 2: ("Low", "#9cc96b"), 3: ("Moderate", "#f2d36b"), 4: ("High", "#ec8b3a"), 5: ("Very high", "#b8322a")}
 MODELS = [("fr", "Frequency Ratio", "#8c6bb1"), ("iv", "Information Value", "#6a51a3"), ("woe", "Weights of Evidence", "#9e9ac8"),
@@ -248,7 +249,8 @@ class LandslideStudyKit(Kit):
                 m &= np.isfinite(a) & np.isfinite(b)
                 act[y] = m
                 pre_of[y] = b
-            except Exception:
+            except Exception as exc:
+                skipped(exc)
                 continue
         if yrs_scan and yrs_scan[-1] in act:   # the last year: test recovery with this year's images so far (if any)
             try:
@@ -502,8 +504,8 @@ class LandslideStudyKit(Kit):
         for s in R.get("user_dates") or []:
             try:
                 dates.append(_d(s))
-            except Exception:
-                pass
+            except Exception as exc:
+                skipped(exc)
         dates = sorted({d for d in dates if d in idx})
         if len(dates) >= 5:
             rows = []

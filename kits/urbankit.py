@@ -89,7 +89,8 @@ class UrbanKit(Kit):
         hy = int(params.get("heat_year") or yb)
         try:
             months = [int(x) for x in str(params.get("hot_months") or "4,5,6").split(",") if x.strip()]
-            assert all(1 <= m <= 12 for m in months)
+            if not all(1 <= m <= 12 for m in months):
+                raise ValueError("months must be numbers from 1 to 12")
         except Exception:
             raise KitError("Hot-season months must be numbers 1–12 separated by commas, e.g. 4,5,6.")
         service = params.get("service") or "health"

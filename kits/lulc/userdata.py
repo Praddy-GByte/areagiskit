@@ -47,9 +47,9 @@ def parent_of(name, explicit=None):
 
 def _shade(hex_col, i, n):
     r, g, b = (int(hex_col[j:j + 2], 16) / 255 for j in (1, 3, 5))
-    h, l, s = colorsys.rgb_to_hls(r, g, b)
-    l = min(0.85, max(0.2, l + (i - (n - 1) / 2) * 0.12))
-    r, g, b = colorsys.hls_to_rgb(h, l, s)
+    h, light, s = colorsys.rgb_to_hls(r, g, b)
+    light = min(0.85, max(0.2, light + (i - (n - 1) / 2) * 0.12))
+    r, g, b = colorsys.hls_to_rgb(h, light, s)
     return "#%02x%02x%02x" % (int(r * 255), int(g * 255), int(b * 255))
 
 

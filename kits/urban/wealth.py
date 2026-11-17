@@ -23,6 +23,7 @@ import numpy as np
 from osgeo import ogr
 
 from ...core.data import UA, get_json, trace
+from ...core.net import open_url
 
 HDX_PKG = "https://data.humdata.org/api/3/action/package_show?id=relative-wealth-index"
 NE_COUNTRIES = "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_110m_admin_0_countries.geojson"
@@ -48,7 +49,7 @@ def _download(url, dest, tries=4):
     for i in range(tries):
         try:
             req = urllib.request.Request(url, headers={"User-Agent": UA})
-            with urllib.request.urlopen(req, timeout=180) as r:
+            with open_url(req, timeout=180) as r:
                 data = r.read()
             if len(data) > 100:
                 tmp = dest + ".part"

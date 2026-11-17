@@ -9,6 +9,7 @@ import urllib.parse
 import urllib.request
 
 from .data import UA, KitError
+from .net import open_url
 
 ENDPOINTS = ["https://overpass-api.de/api/interpreter",
              "https://overpass.kumi.systems/api/interpreter"]
@@ -31,7 +32,7 @@ def facilities(bbox, kind="health", buffer_deg=0.05, timeout=25):
         try:
             req = urllib.request.Request(ep, data=urllib.parse.urlencode({"data": q}).encode(),
                                          headers={"User-Agent": UA})
-            with urllib.request.urlopen(req, timeout=timeout + 10) as r:
+            with open_url(req, timeout=timeout + 10) as r:
                 d = json.load(r)
             out = []
             for e in d.get("elements", []):
@@ -58,7 +59,7 @@ def roads(bbox, timeout=25):
         try:
             req = urllib.request.Request(ep, data=urllib.parse.urlencode({"data": q}).encode(),
                                          headers={"User-Agent": UA})
-            with urllib.request.urlopen(req, timeout=timeout + 10) as r:
+            with open_url(req, timeout=timeout + 10) as r:
                 d = json.load(r)
             return [[(p["lon"], p["lat"]) for p in e.get("geometry", [])] for e in d.get("elements", []) if e.get("geometry")]
         except Exception as exc:

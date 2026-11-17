@@ -15,6 +15,7 @@ import json
 import urllib.request
 
 import numpy as np
+from ...core.net import open_url
 
 API = "https://macrostrat.org/api/v2/geologic_units/map?lat={lat:.5f}&lng={lon:.5f}"
 CREDIT = ("Lithology: Macrostrat geologic map compilation (Peters, S. E., Husson, J. M., Czaplewski, J. 2018. Macrostrat: a platform "
@@ -48,7 +49,7 @@ def group_of(text):
 
 def _query(lat, lon, ua, timeout=20):
     req = urllib.request.Request(API.format(lat=lat, lon=lon), headers={"User-Agent": ua})
-    with urllib.request.urlopen(req, timeout=timeout) as r:
+    with open_url(req, timeout=timeout) as r:
         data = json.load(r)["success"]["data"]
     if not data:
         return None

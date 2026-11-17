@@ -13,6 +13,7 @@ from osgeo import gdal
 
 from ...core.data import item_date, search, warp_items, warp_s2
 from ...core.raster import neighbours
+from ...core.net import skipped
 
 CREDIT_S2 = "Sentinel-2 L2A (Copernicus), Microsoft Planetary Computer."
 
@@ -27,7 +28,8 @@ def ndvi_composite(aoi, grid, start, end, max_cloud=60, max_scenes=12, stat="med
     days = {}
     for it in items:
         days.setdefault(item_date(it), []).append(it)
-    cc = lambda kv: np.mean([i["properties"]["eo:cloud_cover"] for i in kv[1]])
+    def cc(kv):
+        return np.mean([i["properties"]["eo:cloud_cover"] for i in kv[1]])
     if stat == "max":
         best = {}
         for kv in days.items():
@@ -44,9 +46,11 @@ def ndvi_composite(aoi, grid, start, end, max_cloud=60, max_scenes=12, stat="med
             ok = np.isin(scl, [4, 5, 6, 7, 11])
             if ok.sum() < 0.05 * grid.mask.sum():
                 continue
-            rd = lambda b: warp_s2(its, b, grid)
+            def rd(b):
+                return warp_s2(its, b, grid)
             r, n, g, s = rd("B04"), rd("B08"), rd("B03"), rd("B11")
-        except Exception:
+        except Exception as exc:
+            skipped(exc)
             continue
         v = (n - r) / (n + r)
         w = (g - s) / (g + s)

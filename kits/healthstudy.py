@@ -29,6 +29,7 @@ from ..core.data import KitError, search, warp_items
 from .base import Kit
 from .flood import hydro as HY
 from .health import stats as ST
+from ..core.net import skipped
 
 HOT = {1: ("Hot spot, 99%", "#9e1b16"), 2: ("Hot spot, 95%", "#d6402b"), 3: ("Hot spot, 90%", "#f08a6a"),
        4: ("Not significant", "#ece9df"), 5: ("Cold spot, 90%", "#9cc2e0"), 6: ("Cold spot, 95%", "#4a8cc4"),
@@ -245,17 +246,17 @@ class HealthStudyKit(Kit):
         self._aoi, self._params = None, params
         per = float(params.get("per") or 1e5)
         self.step(4, "Reading your areas and case counts")
-        aoi, I = self._read(params, aoi)
+        aoi, inp = self._read(params, aoi)
         self._aoi = aoi
-        R = dict(params=params, per=per, aoi=aoi, I=I, disease=params.get("disease") or "Cases")
-        n = len(I["ids"])
+        R = dict(params=params, per=per, aoi=aoi, I=inp, disease=params.get("disease") or "Cases")
+        n = len(inp["ids"])
         span = (aoi.bbox[2] - aoi.bbox[0]) * (aoi.bbox[3] - aoi.bbox[1]) * 111 * 111 * math.cos(math.radians((aoi.bbox[1] + aoi.bbox[3]) / 2))
         res = max(100.0, math.ceil(math.sqrt(span * 1e6 / 2.5e6) / 10) * 10)
         g = Grid(aoi, res, max_pixels=3_000_000)
         R["g"] = g
-        zone = g.rasterize(I["gl"], values=list(range(1, n + 1)), all_touched=False)
+        zone = g.rasterize(inp["gl"], values=list(range(1, n + 1)), all_touched=False)
         # tiny areas that fall between pixel centres: mark their centroid pixel
-        for i, geom in enumerate(I["gl"]):
+        for i, geom in enumerate(inp["gl"]):
             if not (zone == i + 1).any():
                 c = geom.Centroid()
                 r_, c_ = int((g.gt[3] - c.GetY()) / g.res), int((c.GetX() - g.gt[0]) / g.res)
@@ -264,7 +265,7 @@ class HealthStudyKit(Kit):
         R["zone"] = zone
 
         # ------------------------------------------------------------ population (yours or Meta)
-        need_pop = all(p is None for p in I["P"])
+        need_pop = all(p is None for p in inp["P"])
         pop_grid = None
         if need_pop or params.get("environment", True) not in (False, "false", "0", 0):
             self.step(8, "Reading Meta 30 m population")
@@ -281,16 +282,16 @@ class HealthStudyKit(Kit):
         if need_pop:
             if est is None:
                 raise KitError("No population column and Meta population could not be read; add a population column.")
-            I["P"] = [float(x) for x in est]
+            inp["P"] = [float(x) for x in est]
             R["pop_from_meta"] = True
-        if I["groups"]:   # age standardisation needs every group for an area; areas missing any are left out
-            R["age_missing"] = sum(1 for a in I["AC"] if a is None)
-            I["C"] = [c if a is not None else None for c, a in zip(I["C"], I["AC"])]
-        use = np.array([c is not None and p is not None and p > 0 for c, p in zip(I["C"], I["P"])])
+        if inp["groups"]:   # age standardisation needs every group for an area; areas missing any are left out
+            R["age_missing"] = sum(1 for a in inp["AC"] if a is None)
+            inp["C"] = [c if a is not None else None for c, a in zip(inp["C"], inp["AC"])]
+        use = np.array([c is not None and p is not None and p > 0 for c, p in zip(inp["C"], inp["P"])])
         if use.sum() < 8:
             raise KitError("Fewer than 8 areas have both cases and population.")
-        Cn = np.array([c if c is not None else 0 for c in I["C"]], float)
-        Pn = np.array([p if p is not None and p > 0 else np.nan for p in I["P"]], float)
+        Cn = np.array([c if c is not None else 0 for c in inp["C"]], float)
+        Pn = np.array([p if p is not None and p > 0 else np.nan for p in inp["P"]], float)
         R.update(use=use, C=Cn, P=Pn)
         u = np.flatnonzero(use)
         c, p = Cn[u], Pn[u]
@@ -301,19 +302,19 @@ class HealthStudyKit(Kit):
         lo, hi = ST.byar_ci(c, p, per)
         base0 = c.sum() / p.sum()
         pa = p                      # population used for expected counts (age-adjusted below if age groups are given)
-        if I["groups"]:
+        if inp["groups"]:
             self.step(16, "Age standardisation: direct (WHO standard) and indirect")
             from .health import advanced as AD
-            cg = np.array([I["AC"][k] for k in u], float)
-            pg = np.array([I["AP"][k] for k in u], float)
-            w, covered = AD.who_weights(I["groups"])
+            cg = np.array([inp["AC"][k] for k in u], float)
+            pg = np.array([inp["AP"][k] for k in u], float)
+            w, covered = AD.who_weights(inp["groups"])
             asr, alo, ahi = AD.direct_asr(cg, pg, w, per)
             Eind, rs = AD.indirect_expected(cg, pg)
             pa = Eind / base0        # 'age-adjusted population': expected = overall rate x pa
             sr, slo_, shi_ = AD.direct_asr(cg.sum(0, keepdims=True), pg.sum(0, keepdims=True), w, per)
             smr_i = c / np.maximum(Eind, 1e-12)
             slo, shi = ST.byar_ci(c, Eind, 1.0)
-            R["age"] = dict(groups=I["groups"], w=w, covered=covered, asr=asr, lo=alo, hi=ahi, E=Eind, rs=rs, smr=smr_i,
+            R["age"] = dict(groups=inp["groups"], w=w, covered=covered, asr=asr, lo=alo, hi=ahi, E=Eind, rs=rs, smr=smr_i,
                             smr_lo=slo, smr_hi=shi, overall=(float(sr[0]), float(slo_[0]), float(shi_[0])),
                             crude_by_group=cg.sum(0), pop_by_group=pg.sum(0),
                             r_crude_vs_asr=float(np.corrcoef(raw, asr)[0, 1]) if len(u) > 2 else None)
@@ -323,7 +324,7 @@ class HealthStudyKit(Kit):
 
         # ------------------------------------------------------------ neighbours
         self.step(20, "Finding neighbouring areas")
-        gl = [I["gl"][k] for k in u]
+        gl = [inp["gl"][k] for k in u]
         env_ = [x.GetEnvelope() for x in gl]
         nb = [set() for _ in u]
         tol = max(1.0, g.res * 0.01)
@@ -441,7 +442,7 @@ class HealthStudyKit(Kit):
                 R["bym_cov_err"] = str(ex)
 
         # ------------------------------------------------------------ periods
-        if I["periods"]:
+        if inp["periods"]:
             self.step(78, "Time trends and emerging hot spots")
             try:
                 self._trends(R, params)
@@ -456,7 +457,7 @@ class HealthStudyKit(Kit):
 
     # ================================================================== environment
     def _environment(self, R, aoi, g, zone, n, params):
-        I, u = R["I"], np.flatnonzero(R["use"])
+        inp, u = R["I"], np.flatnonzero(R["use"])
         Z = zone.ravel()
         cnt = np.bincount(Z, minlength=n + 1)[1:].astype(float)
 
@@ -469,7 +470,7 @@ class HealthStudyKit(Kit):
                 return np.where(k > 0, s / k, np.nan)
         E = {}
         self.step(52, "Environment of each area: people and built-up")
-        area_km2 = np.array([x.GetArea() / 1e6 for x in I["gl"]])
+        area_km2 = np.array([x.GetArea() / 1e6 for x in inp["gl"]])
         if R.get("pop_est") is not None:
             E["pop_density"] = R["pop_est"] / np.maximum(area_km2, 1e-6)
         try:
@@ -477,18 +478,18 @@ class HealthStudyKit(Kit):
             if wc is not None:
                 E["built"] = zmean(np.where(g.mask, (wc == 7).astype(np.float32) * 100, np.nan))
                 E["water"] = zmean(np.where(g.mask, (wc == 1).astype(np.float32) * 100, np.nan))
-        except Exception:
-            pass
+        except Exception as exc:
+            skipped(exc)
         self.step(56, "Environment: elevation")
         try:
             E["elev"] = zmean(D.dem(g))
-        except Exception:
-            pass
+        except Exception as exc:
+            skipped(exc)
         last = dt.date.today().year - 1
         self.step(60, "Environment: greenness (MODIS NDVI)")
         try:
             g250 = Grid(aoi, max(250.0, g.res), max_pixels=3_000_000)
-            zone250 = g250.rasterize(I["gl"], values=list(range(1, n + 1)))
+            zone250 = g250.rasterize(inp["gl"], values=list(range(1, n + 1)))
             its = search("modis-13Q1-061", aoi.bbox, f"{last}-01-01", f"{last}-12-31", max_items=200)
             by = {}
             for it in its:
@@ -508,13 +509,13 @@ class HealthStudyKit(Kit):
                 k = np.bincount(Z2[ok], minlength=n + 1)[1:]
                 with np.errstate(all="ignore"):
                     E["ndvi"] = np.where(k > 0, s / k, np.nan)
-        except Exception:
-            pass
+        except Exception as exc:
+            skipped(exc)
         self.step(66, "Environment: day surface temperature (MODIS)")
         try:
             from .urban import heat as HT
             gk = Grid(aoi, max(1000.0, g.res), max_pixels=3_000_000)
-            zk = gk.rasterize(I["gl"], values=list(range(1, n + 1)))
+            zk = gk.rasterize(inp["gl"], values=list(range(1, n + 1)))
             ms = HT.modis_season(gk, last, [1, 4, 7, 10], platforms=("terra",))
             if "Day" in ms:
                 a = ms["Day"].ravel()
@@ -526,14 +527,14 @@ class HealthStudyKit(Kit):
                     lst = np.where(k > 0, s / k, np.nan)
                 # small areas missing a 1 km pixel: nearest-centroid fill
                 if np.isnan(lst).any() and np.isfinite(lst).any():
-                    cx = np.array([(x.Centroid().GetX(), x.Centroid().GetY()) for x in I["gl"]])
+                    cx = np.array([(x.Centroid().GetX(), x.Centroid().GetY()) for x in inp["gl"]])
                     have = np.flatnonzero(np.isfinite(lst))
                     for i in np.flatnonzero(np.isnan(lst)):
                         j = have[np.argmin(((cx[have] - cx[i]) ** 2).sum(1))]
                         lst[i] = lst[j]
                 E["lst"] = lst
-        except Exception:
-            pass
+        except Exception as exc:
+            skipped(exc)
         # access
         self.step(70, "Access to health facilities")
         fac, src = [], None
@@ -670,8 +671,8 @@ class HealthStudyKit(Kit):
             with np.errstate(all="ignore"):
                 acc = np.where(q > 0, s / q, np.nan)
         else:
-            I = R["I"]
-            dem = np.array([(x.Centroid().GetX(), x.Centroid().GetY()) for x in I["gl"]])
+            inp = R["I"]
+            dem = np.array([(x.Centroid().GetX(), x.Centroid().GetY()) for x in inp["gl"]])
             Pa = np.nan_to_num(R["P"])
             acc, Rj = HX.two_step_fca(dem, Pa, sup, cap, float(params.get("access_km") or 5) * 1000.0)
         R["sfca"] = dict(acc=acc * 10000.0, Rj=Rj, used_cap=used_cap, capf=(params.get("capacity_field") or "").strip(),
@@ -731,32 +732,32 @@ class HealthStudyKit(Kit):
 
     # ================================================================== trends
     def _trends(self, R, params):
-        I = R["I"]
-        pf, cf = I["pf"], I["cf"]
+        inp = R["I"]
+        pf, cf = inp["pf"], inp["cf"]
         per = R["per"]
-        keys = list(I["periods"])
+        keys = list(inp["periods"])
         if all(_num(k) is not None for k in keys):
             keys.sort(key=_num)          # 1, 2, 10 in numeric order
-        elif not (I["cf"] == "__c"):     # wide columns keep the order given; others alphabetic
+        elif not (inp["cf"] == "__c"):     # wide columns keep the order given; others alphabetic
             keys.sort()
-        idx = {k: i for i, k in enumerate(I["ids"])}
+        idx = {k: i for i, k in enumerate(inp["ids"])}
         tot = []
-        mat = np.full((len(keys), len(I["ids"])), np.nan)
-        cmat = np.zeros((len(I["ids"]), len(keys)))
-        pmat = np.zeros((len(I["ids"]), len(keys)))
-        G = len(I["age_cols"] or [])
-        acg = np.zeros((len(I["ids"]), len(keys), G))
-        apg = np.zeros((len(I["ids"]), len(keys), G))
+        mat = np.full((len(keys), len(inp["ids"])), np.nan)
+        cmat = np.zeros((len(inp["ids"]), len(keys)))
+        pmat = np.zeros((len(inp["ids"]), len(keys)))
+        G = len(inp["age_cols"] or [])
+        acg = np.zeros((len(inp["ids"]), len(keys), G))
+        apg = np.zeros((len(inp["ids"]), len(keys), G))
         for t, k in enumerate(keys):
             cs, ps = 0.0, 0.0
-            for aid, r in I["periods"][k].items():
+            for aid, r in inp["periods"][k].items():
                 if aid not in idx:
                     continue
                 cv = _num(r.get(cf))
                 pv = _num(r.get(pf)) if pf else None
-                if I.get("age_cols"):
-                    a_c = [_num(r.get(cc)) for cc, _ in I["age_cols"]]
-                    a_p = [_num(r.get(pp)) for _, pp in I["age_cols"]]
+                if inp.get("age_cols"):
+                    a_c = [_num(r.get(cc)) for cc, _ in inp["age_cols"]]
+                    a_p = [_num(r.get(pp)) for _, pp in inp["age_cols"]]
                     if all(x is not None for x in a_c):
                         cv = sum(a_c)
                     if all(x is not None for x in a_p):
@@ -820,7 +821,7 @@ class HealthStudyKit(Kit):
         R["trend_mk"] = HY.mann_kendall([np.nan if v is None else v for v in tot]) if len(keys) >= 6 else None
         u = np.flatnonzero(R["use"])
         up = 0
-        rising = np.zeros(len(I["ids"]), bool)
+        rising = np.zeros(len(inp["ids"]), bool)
         if len(keys) >= 6:
             for j in u:
                 mk = HY.mann_kendall(mat[:, j])
@@ -844,7 +845,7 @@ class HealthStudyKit(Kit):
 
     # ================================================================== outputs
     def _write(self, R, out_dir):
-        I, u = R["I"], np.flatnonzero(R["use"])
+        inp, u = R["I"], np.flatnonzero(R["use"])
         pos = {k: i for i, k in enumerate(u)}
         z, gp, hcls, gfdr = R["gi"]
         Ii, lp, lcls = R["lisa"]
@@ -853,9 +854,9 @@ class HealthStudyKit(Kit):
         kmin = int(R["params"].get("suppress_below") or 0)
         RAW = ("cases", "rate", "rate_lo95", "rate_hi95", "smr", "p_excess", "asr", "asr_lo95", "asr_hi95", "smr_age_adj", "smr_lo95",
                "smr_hi95", "latest_observed")
-        for k in range(len(I["ids"])):
+        for k in range(len(inp["ids"])):
             i = pos.get(k)
-            pr = {"area_id": I["ids"][k], "cases": I["C"][k], "population": None if np.isnan(R["P"][k]) else round(float(R["P"][k]))}
+            pr = {"area_id": inp["ids"][k], "cases": inp["C"][k], "population": None if np.isnan(R["P"][k]) else round(float(R["P"][k]))}
             if i is not None:
                 pr.update(rate=round(float(R["raw"][i]), 3), rate_lo95=round(float(R["lo"][i]), 3), rate_hi95=round(float(R["hi"][i]), 3),
                           expected=round(float(R["exp"][i]), 2), smr=round(float(R["smr"][i]), 3), p_excess=round(float(R["pex"][i]), 4),
@@ -892,13 +893,13 @@ class HealthStudyKit(Kit):
             if R.get("emerging") is not None and i is not None:
                 pr["emerging_hotspot"] = bool(R["emerging"][i])
                 pr["rising_trend"] = bool(R["rising"][k])
-            cval = I["C"][k]
+            cval = inp["C"][k]
             if kmin > 0 and cval is not None and np.isfinite(cval) and 0 < cval < kmin:
                 for kk in RAW:
                     if kk in pr:
                         pr[kk] = None
                 pr["suppressed"] = f"fewer than {kmin} cases"
-            fc["features"].append({"type": "Feature", "geometry": json.loads(I["gw"][k].ExportToJson()), "properties": pr})
+            fc["features"].append({"type": "Feature", "geometry": json.loads(inp["gw"][k].ExportToJson()), "properties": pr})
         out = os.path.join(out_dir, "health_study.geojson")
         with open(out, "w", encoding="utf-8") as fh:
             json.dump(fc, fh)
@@ -929,7 +930,7 @@ class HealthStudyKit(Kit):
                 fh.write("cluster,areas,observed,expected,relative_risk,llr,p_value,population,area_ids\n")
                 for k, cl in enumerate(R["scan"]):
                     fh.write(f"{k + 1},{len(cl['members'])},{cl['obs']:.0f},{cl['exp']:.2f},{cl['rr']:.3f},{cl['llr']:.3f},{cl['p']:.4f},"
-                             f"{cl['pop']:.0f},\"{' '.join(I['ids'][u[m]] for m in cl['members'])}\"\n")
+                             f"{cl['pop']:.0f},\"{' '.join(inp['ids'][u[m]] for m in cl['members'])}\"\n")
             files.append(p)
         if R.get("fc") or R.get("ew"):
             p = os.path.join(out_dir, "forecast_and_alerts.csv")
@@ -938,11 +939,12 @@ class HealthStudyKit(Kit):
                 w.writerow(["area_id", "latest_observed", "latest_expected", "latest_upper99", "alert", "next_forecast", "next_lo95", "next_hi95"])
                 ew_, fc_ = R.get("ew") or {}, R.get("fc") or {}
                 for j, k in enumerate(u):
-                    g_ = lambda d, key: "" if not d else round(float(d[key][j]), 2)
+                    def g_(d, key):
+                        return "" if not d else round(float(d[key][j]), 2)
                     ob = g_(ew_, "observed")
                     if kmin > 0 and ob != "" and 0 < ob < kmin:
                         ob = f"<{kmin}"
-                    w.writerow([I["ids"][k], ob, g_(ew_, "expected"), g_(ew_, "upper"),
+                    w.writerow([inp["ids"][k], ob, g_(ew_, "expected"), g_(ew_, "upper"),
                                 "" if not ew_ else int(ew_["alert"][j]), g_(fc_, "mean"), g_(fc_, "lo"), g_(fc_, "hi")])
             files.append(p)
         if R.get("st_scan"):
@@ -952,7 +954,7 @@ class HealthStudyKit(Kit):
                 fh.write("cluster,areas,from_period,to_period,observed,expected,relative_risk,llr,p_value,area_ids\n")
                 for k, cl in enumerate(R["st_scan"]):
                     fh.write(f"{k + 1},{len(cl['members'])},{keys_[cl['t0']]},{keys_[cl['t1']]},{cl['obs']:.0f},{cl['exp']:.2f},"
-                             f"{cl['rr']:.3f},{cl['llr']:.3f},{cl['p']:.4f},\"{' '.join(I['ids'][u[m]] for m in cl['members'])}\"\n")
+                             f"{cl['rr']:.3f},{cl['llr']:.3f},{cl['p']:.4f},\"{' '.join(inp['ids'][u[m]] for m in cl['members'])}\"\n")
             files.append(p)
         if R.get("stp_scan"):
             p = os.path.join(out_dir, "spacetime_permutation_clusters.csv")
@@ -961,7 +963,7 @@ class HealthStudyKit(Kit):
                 fh.write("cluster,areas,from_period,to_period,observed,expected,ratio,llr,p_value,area_ids\n")
                 for k, cl in enumerate(R["stp_scan"]):
                     fh.write(f"{k + 1},{len(cl['members'])},{keys_[cl['t0']]},{keys_[cl['t1']]},{cl['obs']:.0f},{cl['exp']:.2f},"
-                             f"{cl['rr']:.3f},{cl['llr']:.3f},{cl['p']:.4f},\"{' '.join(I['ids'][u[m]] for m in cl['members'])}\"\n")
+                             f"{cl['rr']:.3f},{cl['llr']:.3f},{cl['p']:.4f},\"{' '.join(inp['ids'][u[m]] for m in cl['members'])}\"\n")
             files.append(p)
         if R.get("bym_cov") and R["bym_cov"].get("beta"):
             bc, bt = R["bym_cov"], R["bym_cov"]["beta"]

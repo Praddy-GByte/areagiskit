@@ -25,6 +25,7 @@ import zipfile
 
 from .maps import HAVE_MPL, MapSpec, render_bars, render_line, render_map
 from .raster import preview_classes, preview_float
+from .net import skipped
 
 E = html.escape
 
@@ -810,7 +811,8 @@ def _write_pdf_mpl(B, path, accent):
     W_, H_ = 8.27, 11.69
     L, R, T, Bm = 0.07, 0.93, 0.95, 0.05
     ink, mute = "#1c2621", "#5d6b63"
-    strip = lambda t: html.unescape(re.sub(r"<[^>]+>", "", re.sub(r"\*\*(.+?)\*\*", r"\1", str(t))))
+    def strip(t):
+        return html.unescape(re.sub(r"<[^>]+>", "", re.sub(r"\*\*(.+?)\*\*", r"\1", str(t))))
     st = dict(pdf=PdfPages(path), fig=None, y=T, n=0)
 
     def new_page():
@@ -894,7 +896,8 @@ def _write_pdf_mpl(B, path, accent):
         elif k == "fig":
             try:
                 img = imread(io.BytesIO(b[1]), format="png")
-            except Exception:
+            except Exception as exc:
+                skipped(exc)
                 continue
             ih, iw = img.shape[:2]
             wfrac = R - L

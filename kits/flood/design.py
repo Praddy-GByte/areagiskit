@@ -157,6 +157,7 @@ def forecast(get, lon, lat, days=210):
             if "429" not in str(e) or i == 3:
                 raise
     t = [dt.date.fromisoformat(x) for x in d["daily"]["time"]]
-    arr = lambda k: np.array([np.nan if x is None else x for x in d["daily"].get(k, [None] * len(t))], float)
+    def arr(k):
+        return np.array([np.nan if x is None else x for x in d["daily"].get(k, [None] * len(t))], float)
     return url, dict(dates=t, control=arr("river_discharge"), median=arr("river_discharge_median"), max=arr("river_discharge_max"),
                      p75=arr("river_discharge_p75"), p25=arr("river_discharge_p25"), min=arr("river_discharge_min"))
