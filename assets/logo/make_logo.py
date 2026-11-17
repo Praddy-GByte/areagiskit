@@ -79,7 +79,7 @@ soc = (f'<rect width="1280" height="640" fill="{NAVY}"/>'
        f'<g transform="translate(985,110) scale(0.52)">{mark(bg=False)}</g>'
        f'<text x="120" y="250" font-family="Inter" font-weight="800" font-size="118" fill="#FFFFFF" letter-spacing="-3">AreaGIS'
        f'<tspan font-weight="300" dx="16">Kit</tspan></text>'
-       f'<text x="124" y="320" font-family="Inter" font-weight="500" font-size="36" fill="#9FB6CA">One area. Six self-checked studies. 236 analyses.</text>'
+       f'<text x="124" y="320" font-family="Inter" font-weight="500" font-size="36" fill="#9FB6CA">One area. Six studies. 236 analyses.</text>'
        f'<text x="124" y="372" font-family="Inter" font-weight="500" font-size="28" fill="#6F8BA3">Open source  ·  QGIS + ArcGIS Pro  ·  Word, PDF, HTML reports</text>'
        + chips)
 open("areagiskit_social.svg", "w").write(svg(soc, 1280, 640))

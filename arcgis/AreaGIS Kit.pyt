@@ -3,7 +3,7 @@
 # Copyright (C) 2026 Pradeepika Kaushik
 # SPDX-License-Identifier: GPL-3.0-or-later
 # Additional terms under GPL section 7 (attribution and name): see NOTICE.
-"""AreaGIS Kit for ArcGIS Pro: complete, self-checked geospatial studies of any area.
+"""AreaGIS Kit for ArcGIS Pro: complete geospatial studies of any area.
 
 Keep this file next to the 'areagiskit' folder, then in ArcGIS Pro: Catalog pane > Toolboxes > Add Toolbox > choose this file.
 """

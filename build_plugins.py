@@ -249,7 +249,7 @@ def build(P):
 
 
 ALL = dict(key=None, folder="areagiskit", name="AreaGIS Kit", colour="#0f3d5e", glyph="A",
-           description="Six complete, self-checked GIS studies in one plugin: Flood, LULC, Landslide, Crop, Urban and Health. "
+           description="Six complete GIS studies in one plugin: Flood, LULC, Landslide, Crop, Urban and Health. "
                        "Pick an area, press Run, get validated maps and a Word/PDF/HTML report.")
 
 
@@ -295,7 +295,7 @@ def build_all():
 
 ARCGIS_README = """AreaGIS Kit for ArcGIS Pro (beta) {version}
 
-Complete, self-checked geospatial studies of any area: Flood, LULC, Landslide, Crop, Urban and Health.
+Complete geospatial studies of any area: Flood, LULC, Landslide, Crop, Urban and Health.
 Same engine and the same reports as the QGIS plugins.
 
 INSTALL
