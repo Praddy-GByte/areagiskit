@@ -182,7 +182,17 @@ Each installs on its own; install any combination.
 """
 
 
+def _no_percent(text):
+    """The QGIS plugin site reads metadata.txt with Python's configparser, where a bare % is an error."""
+    text = re.sub(r"(\d)\s*%", r"\1 percent", text)
+    return text.replace("%", " percent")
+
+
 def metadata(P):
+    return _no_percent(_metadata(P))
+
+
+def _metadata(P):
     repo = f"{GH}/areagiskit"   # one repository for all six kits and the ArcGIS Pro toolbox
     return f"""[general]
 name={P['name']}
