@@ -1,7 +1,8 @@
 # AreaGIS Kit: an open-source research workflow for QGIS and ArcGIS Pro
 
-**Download:** [latest release (v0.14.0 beta)](https://github.com/Praddy-GByte/areagiskit/releases/latest): one zip per kit for
-QGIS (Plugins > Manage and Install Plugins > Install from ZIP) and one ArcGIS Pro toolbox zip with all six kits.
+**Download:** [latest release (v0.14.0 beta)](https://github.com/Praddy-GByte/areagiskit/releases/latest):
+`areagiskit.zip` is the QGIS plugin with all six kits (Plugins > Manage and Install Plugins > Install from ZIP);
+`AreaGIS_Kit_for_ArcGIS_Pro.zip` is the ArcGIS Pro toolbox. Single-kit QGIS zips are also there for anyone who wants just one.
 Problems or suggestions: [open an issue](https://github.com/Praddy-GByte/areagiskit/issues).
 
 AreaGIS Kit brings data acquisition, standard analyses, independent validation, confidence grading and reproducible

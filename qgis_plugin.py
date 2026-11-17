@@ -36,7 +36,8 @@ class AreaGISKitPlugin:
         icon = QIcon(os.path.join(os.path.dirname(__file__), "icon.png"))
         menu = QMenu(PLUGIN_NAME)
         for k in all_kits():
-            a = QAction(icon, f"{k.NAME}: {k.TAGLINE}", self.iface.mainWindow())
+            kp = os.path.join(os.path.dirname(__file__), "icons", f"{k.KEY}.png")
+            a = QAction(QIcon(kp) if os.path.exists(kp) else icon, f"{k.NAME}: {k.TAGLINE}", self.iface.mainWindow())
             a.setToolTip(k.DESCRIPTION)
             a.triggered.connect(lambda _=False, key=k.KEY: self.open(key))
             menu.addAction(a)

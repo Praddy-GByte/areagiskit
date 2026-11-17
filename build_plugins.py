@@ -238,6 +238,47 @@ def build(P):
     return z
 
 
+ALL = dict(key=None, folder="areagiskit", name="AreaGIS Kit", colour="#0f3d5e", glyph="A",
+           description="Six complete, self-checked GIS studies in one plugin: Flood, LULC, Landslide, Crop, Urban and Health. "
+                       "Pick an area, press Run, get validated maps and a Word/PDF/HTML report.")
+
+
+def build_all():
+    """One QGIS plugin with all six kits: one toolbar button with a menu of kits, six Processing tools."""
+    P = dict(ALL)
+    P["about"] = " ".join(f"{K['name'].split(': ')[1]}: {K['about']}" for K in PLUGINS)
+    P["validation"] = [f"{K['name'].split(': ')[1]}: {v}" for K in PLUGINS for v in K["validation"]]
+    P["tags"] = ",".join(dict.fromkeys(t.strip() for K in PLUGINS for t in K["tags"].split(",")))
+    P["example"] = PLUGINS[0]["example"]
+    dst = os.path.join(DIST, P["folder"])
+    shutil.rmtree(dst, ignore_errors=True)
+    shutil.copytree(SRC, dst, ignore=shutil.ignore_patterns("__pycache__", "*.pyc", "validation_floodbench", "tests", "build_plugins.py", ".*",
+                                                            "README.md", "metadata.txt", "icon.png", "arcgis", "arcgis_tools.py"))
+    with open(os.path.join(dst, "plugin_info.py"), "w") as fh:
+        fh.write("# AreaGIS Kit\n# Copyright (C) 2026 Pradeepika Kaushik\n# SPDX-License-Identifier: GPL-3.0-or-later\n"
+                 "# Additional terms under GPL section 7 (attribution and name): see NOTICE.\n")
+        fh.write('"""Identity of this plugin (written by build_plugins.py)."""\n'
+                 'PLUGIN_NAME = "AreaGIS Kit"\nPROVIDER_ID = "areagiskit"\nKIT_KEYS = None\n')
+    readme_text = readme(P).replace("## Family\nPart of AreaGIS Kit, a set of one-click study plugins by", "## Kits\nAll six kits by") \
+                           .replace("Each installs on its own; install any combination.", "One toolbar button opens a menu of the six kits.")
+    open(os.path.join(dst, "README.md"), "w").write(readme_text)
+    open(os.path.join(dst, "metadata.txt"), "w").write(metadata(P))
+    icon(os.path.join(dst, "icon.png"), P["colour"], P["glyph"])
+    os.makedirs(os.path.join(dst, "icons"), exist_ok=True)
+    for K in PLUGINS:
+        icon(os.path.join(dst, "icons", f"{K['key']}.png"), K["colour"], K["glyph"])
+    os.makedirs(OUT, exist_ok=True)
+    z = os.path.join(OUT, "areagiskit.zip")
+    if os.path.exists(z):
+        os.remove(z)
+    with zipfile.ZipFile(z, "w", zipfile.ZIP_DEFLATED) as zf:
+        for root, _, files in os.walk(dst):
+            for f in files:
+                full = os.path.join(root, f)
+                zf.write(full, os.path.relpath(full, DIST))
+    return z
+
+
 ARCGIS_README = """AreaGIS Kit for ArcGIS Pro (beta) {version}
 
 Complete, self-checked geospatial studies of any area: Flood, LULC, Landslide, Crop, Urban and Health.
@@ -292,6 +333,9 @@ if __name__ == "__main__":
         if not only or P["key"] in only:
             z = build(P)
             print(f"{P['name']:22s} {os.path.getsize(z) / 1e6:5.2f} MB  {z}")
+    if not only or "all" in only:
+        z = build_all()
+        print(f"{'AreaGIS Kit (all six)':22s} {os.path.getsize(z) / 1e6:5.2f} MB  {z}")
     if not only or "arcgis" in only:
         z = build_arcgis()
         print(f"{'ArcGIS Pro toolbox':22s} {os.path.getsize(z) / 1e6:5.2f} MB  {z}")
