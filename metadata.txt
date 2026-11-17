@@ -1,0 +1,19 @@
+[general]
+name=AreaGIS Kit
+qgisMinimumVersion=3.22
+description=Open-source research workflow for QGIS: data acquisition, standard analyses, independent validation, confidence grading and a reproducible report in one run (all six kits in one plugin).
+version=0.14.0
+author=Pradeepika Kaushik
+email=you@example.com
+about=AreaGIS Kit with all six kits (Flood, LULC, Landslide, Crop, Urban, Health) in one plugin. The same kits are also published as six separate plugins. Pick an area, set one or two options and run: open data is fetched for your area (no account, no manual download), the standard analyses run, results are checked against independent data, confidence is graded, and a reproducible HTML, Word and PDF report is written.
+tracker=https://github.com/your-name/areagis-kit/issues
+repository=https://github.com/your-name/areagis-kit
+homepage=https://github.com/your-name/areagis-kit
+tags=flood,sentinel-1,land cover,LULC,landslide,crop,NDVI,urban heat island,health,hot spot,validation,report
+category=Analysis
+icon=icon.png
+experimental=True
+hasProcessingProvider=yes
+deprecated=False
+license=GPL-3.0-or-later
+changelog=0.14.0: AreaGIS Kit release. Landslide hindcast; Sentinel-2 duplicate-tile fix; recovery test for landslide scars; privacy rule for small case counts; projection stops if its hindcast fails; every report opens with what it cannot tell you.

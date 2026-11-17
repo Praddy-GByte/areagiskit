@@ -1,0 +1,28 @@
+AreaGIS Kit
+Copyright (C) 2026 Pradeepika Kaushik. All rights reserved except as granted by the licence below.
+
+This program is free software: you can redistribute it and/or modify it under the terms of the
+GNU General Public License as published by the Free Software Foundation, either version 3 of the
+License, or (at your option) any later version. See the LICENSE file.
+
+ADDITIONAL TERMS (GNU GPL version 3, section 7)
+
+These terms apply to every copy and every modified version of this program.
+
+1. Attribution (section 7(b)). You must keep this NOTICE file, the copyright lines at the top of
+   each source file, and the author credit "Pradeepika Kaushik" in the plugin metadata and the
+   about text.
+
+2. Origin (section 7(c)). You must not present a modified version as the original or as the work
+   of the author. A modified version must say clearly, in its description and in its reports,
+   that it has been changed and by whom.
+
+3. Name and logo (section 7(e)). The names "AreaGIS Kit", "AreaGIS Kit: Flood", "AreaGIS Kit: LULC",
+   "AreaGIS Kit: Landslide", "AreaGIS Kit: Crop", "AreaGIS Kit: Urban", "AreaGIS Kit: Health" and
+   the AreaGIS Kit icons are not licensed under the GPL. A modified or redistributed version must
+   use a different name and different icons, unless the author has given written permission.
+
+For permission beyond these terms, contact the author through
+https://github.com/Praddy-GByte/areagiskit
+
+Data used by the kits keeps its own licence; see DATA_LICENSES.md.
