@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="640" viewBox="0 0 1280 640">
+  <rect width="1280" height="640" fill="#0B2A42"/><g transform="translate(985,110) scale(0.52)"><polygon points="256.0,76.1 419.5,159.0 435.2,342.6 291.8,443.4 105.9,389.7 85.8,190.3" fill="none" stroke="#FFFFFF" stroke-opacity="0.55" stroke-width="7" stroke-dasharray="18 14" stroke-linejoin="round"/>
+  <polygon points="256,262 256,96 402,170" fill="#2D7FD3"/>
+  <polygon points="256,262 402,170 416,334" fill="#2E9E6A"/>
+  <polygon points="256,262 416,334 288,424" fill="#B5712E"/>
+  <polygon points="256,262 288,424 122,376" fill="#9BB52A"/>
+  <polygon points="256,262 122,376 104,198" fill="#E04B3A"/>
+  <polygon points="256,262 104,198 256,96" fill="#8E44AD"/>
+  <line x1="256" y1="262" x2="256" y2="96" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round"/>
+  <line x1="256" y1="262" x2="402" y2="170" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round"/>
+  <line x1="256" y1="262" x2="416" y2="334" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round"/>
+  <line x1="256" y1="262" x2="288" y2="424" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round"/>
+  <line x1="256" y1="262" x2="122" y2="376" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round"/>
+  <line x1="256" y1="262" x2="104" y2="198" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round"/>
+  <polygon points="256.0,96.0 402.0,170.0 416.0,334.0 288.0,424.0 122.0,376.0 104.0,198.0" fill="none" stroke="#FFFFFF" stroke-width="10" stroke-linejoin="round"/>
+  <circle cx="256" cy="262" r="30" fill="#FFFFFF"/>
+  <circle cx="256" cy="262" r="13" fill="#0B2A42"/></g><text x="120" y="250" font-family="Inter" font-weight="800" font-size="118" fill="#FFFFFF" letter-spacing="-3">AreaGIS<tspan font-weight="300" dx="16">Kit</tspan></text><text x="124" y="320" font-family="Inter" font-weight="500" font-size="36" fill="#9FB6CA">One area. Six self-checked studies. 236 analyses.</text><text x="124" y="372" font-family="Inter" font-weight="500" font-size="28" fill="#6F8BA3">Open source  ·  QGIS + ArcGIS Pro  ·  Word, PDF, HTML reports</text><rect x="120" y="452" width="148" height="54" rx="27" fill="#2D7FD3"/><text x="194.0" y="488" text-anchor="middle" font-family="Inter" font-weight="700" font-size="26" fill="#FFFFFF">Flood</text><rect x="284" y="452" width="126" height="54" rx="27" fill="#2E9E6A"/><text x="347.0" y="488" text-anchor="middle" font-family="Inter" font-weight="700" font-size="26" fill="#FFFFFF">LULC</text><rect x="426" y="452" width="236" height="54" rx="27" fill="#B5712E"/><text x="544.0" y="488" text-anchor="middle" font-family="Inter" font-weight="700" font-size="26" fill="#FFFFFF">Landslide</text><rect x="678" y="452" width="126" height="54" rx="27" fill="#9BB52A"/><text x="741.0" y="488" text-anchor="middle" font-family="Inter" font-weight="700" font-size="26" fill="#FFFFFF">Crop</text><rect x="820" y="452" width="148" height="54" rx="27" fill="#E04B3A"/><text x="894.0" y="488" text-anchor="middle" font-family="Inter" font-weight="700" font-size="26" fill="#FFFFFF">Urban</text><rect x="984" y="452" width="170" height="54" rx="27" fill="#8E44AD"/><text x="1069.0" y="488" text-anchor="middle" font-family="Inter" font-weight="700" font-size="26" fill="#FFFFFF">Health</text>
+</svg>

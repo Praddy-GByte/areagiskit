@@ -1,3 +1,5 @@
+<p align="center"><img src="assets/logo/areagiskit_logo_light.png" alt="AreaGIS Kit" width="560"></p>
+
 # AreaGIS Kit: an open-source research workflow for QGIS and ArcGIS Pro
 
 **Download:** [latest release (v0.14.0 beta)](https://github.com/Praddy-GByte/areagiskit/releases/latest):
