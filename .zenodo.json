@@ -1,0 +1,10 @@
+{
+  "title": "AreaGIS Kit: one-click, validated geospatial studies for QGIS and ArcGIS Pro",
+  "upload_type": "software",
+  "creators": [{"name": "Kaushik, Pradeepika"}],
+  "description": "AreaGIS Kit runs a complete geospatial study of any area in one run: Flood, LULC, Landslide, Crop, Urban and Health. Each kit fetches open data for the area, runs the standard analyses for its field, compares its results with independent data where it can, grades its confidence and writes a Word, PDF and HTML report that states what the results cannot tell you. QGIS plugin and ArcGIS Pro toolbox (beta).",
+  "license": "GPL-3.0-or-later",
+  "access_right": "open",
+  "keywords": ["QGIS", "ArcGIS Pro", "GIS", "remote sensing", "Sentinel-1", "Sentinel-2", "flood mapping", "landslide susceptibility", "land use land cover", "agriculture", "urban heat island", "spatial epidemiology"],
+  "related_identifiers": [{"identifier": "https://github.com/Praddy-GByte/areagiskit", "relation": "isSupplementTo", "scheme": "url"}]
+}
