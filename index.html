@@ -114,6 +114,18 @@ areagiskit list</pre>
 <section class="block" id="use"><h2>Use</h2><p class="lead">Every study follows the same four steps.</p>
 <div class="grid2">
 <div class="card"><h3>In QGIS or ArcGIS Pro</h3><ul><li>Open the study (toolbar button, Processing Toolbox or ArcGIS toolbox).</li><li>Choose the area: a polygon layer, the map extent or a drawn box.</li><li>Set one or two options; every option has a sensible default.</li><li>Press <b>Run</b>. The report opens when it is finished and the result layers are added to the map.</li></ul></div>
+<div class="card"><h3>From Python</h3>
+<pre>from areagiskit.core.aoi import AOI
+from areagiskit.kits import get
+
+area = AOI(bbox=[67.6, 26.6, 67.9, 26.85], name="Dadu")
+kit = get("floodstudy")()
+result = kit.run(area, {"event_date": "2022-09-03"}, "out/dadu")
+
+print(result["summary"])
+print(result["verdict"]["level"])   # High / Medium / Low
+print(result["report"])             # report.html, .docx, .pdf</pre>
+<p style="margin:0;font-size:14.5px;color:var(--sub)">Studies: <code>floodstudy</code>, <code>lulc</code>, <code>landslide</code>, <code>cropstudy</code>, <code>urbanstudy</code>, <code>healthstudy</code>. Run <code>areagiskit list</code> to see every option.</p></div>
 <div class="card"><h3>From the command line</h3>
 <pre>areagiskit floodstudy --bbox 67.6 26.6 67.9 26.85 \
   --name "Dadu, Sindh" event_date=2022-09-03 --out out/
