@@ -39,8 +39,9 @@ To use your own boundary instead of a box, pass its outline as WKT in longitude/
 
 ```python
 from osgeo import ogr
-geom = ogr.Open("district.gpkg").GetLayer(0).GetNextFeature().GetGeometryRef()   # a layer in EPSG:4326
-area = AOI(wkt=geom.ExportToWkt(), name="My district")
+ds = ogr.Open("district.gpkg")                     # a polygon layer in EPSG:4326
+feature = ds.GetLayer(0).GetNextFeature()
+area = AOI(wkt=feature.GetGeometryRef().ExportToWkt(), name="My district")
 ```
 
 The six studies: `floodstudy`, `lulc`, `landslide`, `cropstudy`, `urbanstudy`, `healthstudy`.
