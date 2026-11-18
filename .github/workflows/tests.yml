@@ -1,0 +1,21 @@
+# AreaGIS Kit: run the offline test suite on every push and pull request.
+name: tests
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install GDAL, numpy, matplotlib and scipy
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3-gdal python3-numpy python3-matplotlib python3-scipy
+      - name: Run the tests
+        env:
+          MPLBACKEND: Agg
+        run: python3 tests/run_all.py
