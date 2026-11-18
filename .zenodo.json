@@ -1,5 +1,5 @@
 {
-  "title": "AreaGIS Kit: one-click, validated geospatial studies for QGIS and ArcGIS Pro",
+  "title": "AreaGIS Kit: one-click geospatial studies for QGIS and ArcGIS Pro",
   "upload_type": "software",
   "creators": [{"name": "Kaushik, Pradeepika"}],
   "description": "AreaGIS Kit runs a complete geospatial study of any area in one run: Flood, LULC, Landslide, Crop, Urban and Health. Each kit fetches open data for the area, runs the standard analyses for its field, compares its results with independent data where it can, grades its confidence and writes a Word, PDF and HTML report that states what the results cannot tell you. QGIS plugin and ArcGIS Pro toolbox (beta).",

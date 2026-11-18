@@ -1,6 +1,6 @@
 cff-version: 1.2.0
 message: "If you use AreaGIS Kit in your work, please cite it as below."
-title: "AreaGIS Kit: one-click, validated geospatial studies for QGIS and ArcGIS Pro"
+title: "AreaGIS Kit: one-click geospatial studies for QGIS and ArcGIS Pro"
 type: software
 authors:
   - family-names: Kaushik
@@ -8,6 +8,7 @@ authors:
 version: 0.14.1
 date-released: 2026-11-18
 license: GPL-3.0-or-later
+doi: 10.5281/zenodo.24326879
 repository-code: "https://github.com/Praddy-GByte/areagiskit"
 url: "https://github.com/Praddy-GByte/areagiskit"
 abstract: >-

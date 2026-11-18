@@ -1,4 +1,5 @@
 <p align="center"><img src="assets/logo/areagiskit_logo_light.png" alt="AreaGIS Kit" width="560"></p>
+<p align="center"><a href="https://doi.org/10.5281/zenodo.24326879"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.24326879.svg" alt="DOI 10.5281/zenodo.24326879"></a></p>
 
 # AreaGIS Kit: an open-source research workflow for QGIS and ArcGIS Pro
 
@@ -214,6 +215,11 @@ environment in the Package Manager and add the `gdal` package. The toolbox has b
 Code: GNU GPL v3.0 or later, with additional terms in `NOTICE`: keep the author credit, mark changed
 versions as changed, and do not use the name "AreaGIS Kit" or its icons for a modified version.
 Data: see `DATA_LICENSES.md` (RWI, GEM and Open-Meteo data are non-commercial).
+
+## How to cite
+
+Kaushik, P. (2026). AreaGIS Kit: one-click geospatial studies for QGIS and ArcGIS Pro (Version 0.14.1) [Software].
+Zenodo. https://doi.org/10.5281/zenodo.24326879
 
 ## Contributing
 
