@@ -6,10 +6,10 @@ the user's area, and every report carries the required credits.
 
 | Dataset | Used by | Licence | Commercial use | Status |
 |---|---|---|---|---|
-| Impact Observatory / Microsoft / Esri 10 m Annual LULC v02 | Land, Flood, Hazard, Crop, Urban | CC BY 4.0 | Yes, with credit | Confirmed |
-| ESA WorldCover 2021 | Land, Urban (validation) | CC BY 4.0 | Yes, with credit | Confirmed |
-| ASF Global 30 m HAND | Flood, Hazard | CC0 1.0 (+ Copernicus DEM credit) | Yes | Confirmed (registry.opendata.aws/glo-30-hand) |
-| Copernicus DEM GLO-30 | Flood, Hazard | Copernicus DEM licence: free, worldwide, attribution | Yes, with credit | Re-check before a paid release |
+| Impact Observatory / Microsoft / Esri 10 m Annual LULC v02 | LULC, Flood, Landslide, Crop, Urban | CC BY 4.0 | Yes, with credit | Confirmed |
+| ESA WorldCover 2021 | LULC, Urban (validation) | CC BY 4.0 | Yes, with credit | Confirmed |
+| ASF Global 30 m HAND | Flood, Landslide | CC0 1.0 (+ Copernicus DEM credit) | Yes | Confirmed (registry.opendata.aws/glo-30-hand) |
+| Copernicus DEM GLO-30 | Flood, Landslide | Copernicus DEM licence: free, worldwide, attribution | Yes, with credit | Re-check before a paid release |
 | Sentinel-1 RTC (Planetary Computer) | Flood | Copernicus Sentinel data terms; RTC processing by Catalyst/Microsoft | Check RTC processing terms | Re-check before a paid release |
 | Sentinel-2 L2A | Crop, Landslide, Urban | Copernicus Sentinel data terms (free, full, open) | Yes, with credit | Re-check before a paid release |
 | JRC Global Surface Water | Flood | Free with attribution (EC JRC) | Yes, with credit | Re-check before a paid release |
@@ -34,7 +34,7 @@ the user's area, and every report carries the required credits.
 | GEM Global Seismic Hazard Map v2023.1 (PGA 475-yr, Zenodo 8409647) | Landslide (seismic factor) | CC BY-NC-SA 4.0 | **No: non-commercial only** (GEM licence needed) | Confirmed — option `seismic` switches it off |
 | USGS ShakeMap / earthquake catalogue API | Landslide | U.S. public domain | Yes | Confirmed |
 | Natural Earth 1:110m land (bundled, location insets) | All | Public domain | Yes | Confirmed |
-| User data (cases, boundaries, facilities, inventories) | Health, Hazard, Urban | User's own | User's responsibility | — |
+| User data (cases, boundaries, facilities, inventories) | Health, Landslide, Urban | User's own | User's responsibility | — |
 
 Not used on purpose: WDPA protected areas (no commercial use or redistribution without UNEP-WCMC permission).
 Add any new dataset to this table, with its licence checked, before it ships.
