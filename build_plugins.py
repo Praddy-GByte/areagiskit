@@ -219,7 +219,7 @@ changelog={VERSION}: Safer downloads (http and https only), no silent error hand
 def build(P):
     dst = os.path.join(DIST, P["folder"])
     shutil.rmtree(dst, ignore_errors=True)
-    shutil.copytree(SRC, dst, ignore=shutil.ignore_patterns("__pycache__", "*.pyc", "validation_floodbench", "tests", "build_plugins.py", ".*",
+    shutil.copytree(SRC, dst, ignore=shutil.ignore_patterns("__pycache__", "*.pyc", "validation_floodbench", "tests", "build_plugins.py", "build_pypi.py", "dist_pypi", "_pypi_stage", ".*",
                                                             "README.md", "metadata.txt", "icon.png", "arcgis", "arcgis_tools.py", "assets"))
     with open(os.path.join(dst, "plugin_info.py"), "w") as fh:
         fh.write("# AreaGIS Kit\n# Copyright (C) 2026 Pradeepika Kaushik\n# SPDX-License-Identifier: GPL-3.0-or-later\n"
@@ -262,7 +262,7 @@ def build_all():
     P["example"] = PLUGINS[0]["example"]
     dst = os.path.join(DIST, P["folder"])
     shutil.rmtree(dst, ignore_errors=True)
-    shutil.copytree(SRC, dst, ignore=shutil.ignore_patterns("__pycache__", "*.pyc", "validation_floodbench", "tests", "build_plugins.py", ".*",
+    shutil.copytree(SRC, dst, ignore=shutil.ignore_patterns("__pycache__", "*.pyc", "validation_floodbench", "tests", "build_plugins.py", "build_pypi.py", "dist_pypi", "_pypi_stage", ".*",
                                                             "README.md", "metadata.txt", "icon.png", "arcgis", "arcgis_tools.py", "assets"))
     with open(os.path.join(dst, "plugin_info.py"), "w") as fh:
         fh.write("# AreaGIS Kit\n# Copyright (C) 2026 Pradeepika Kaushik\n# SPDX-License-Identifier: GPL-3.0-or-later\n"
@@ -326,7 +326,7 @@ def build_arcgis():
     shutil.rmtree(root, ignore_errors=True)
     os.makedirs(root)
     shutil.copytree(SRC, os.path.join(root, "areagiskit"), ignore=shutil.ignore_patterns(
-        "__pycache__", "*.pyc", "validation_floodbench", "tests", "build_plugins.py", ".*", "arcgis", "metadata.txt", "icon.png", "assets"))
+        "__pycache__", "*.pyc", "validation_floodbench", "tests", "build_plugins.py", "build_pypi.py", "dist_pypi", "_pypi_stage", ".*", "arcgis", "metadata.txt", "icon.png", "assets"))
     shutil.copy(os.path.join(SRC, "arcgis", "AreaGIS Kit.pyt"), root)
     open(os.path.join(root, "README_ArcGIS.txt"), "w").write(ARCGIS_README.format(version=VERSION, author=AUTHOR))
     os.makedirs(OUT, exist_ok=True)

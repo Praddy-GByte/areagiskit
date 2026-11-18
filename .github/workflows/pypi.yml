@@ -1,0 +1,42 @@
+# AreaGIS Kit: build the Python package and publish it to PyPI.
+# Run it by hand from the Actions tab ("Publish to PyPI" > Run workflow).
+# Uses PyPI trusted publishing, so no password or token is stored anywhere.
+name: Publish to PyPI
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Build wheel and source package
+        run: |
+          python -m pip install --upgrade build twine
+          python build_pypi.py
+          python -m twine check dist_pypi/*
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist_pypi/
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/areagiskit
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist_pypi/
+      - uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: dist_pypi/

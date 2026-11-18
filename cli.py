@@ -12,9 +12,24 @@
 import argparse
 import sys
 
-from .core.aoi import AOI
-from .core.data import KitError
-from .kits import all_kits, get
+GDAL_HELP = """AreaGIS Kit needs GDAL's Python bindings (the 'osgeo' module), which are not installed in this Python.
+
+Easiest fix (conda):
+    conda create -n areagis -c conda-forge python=3.12 gdal numpy matplotlib scipy
+    conda activate areagis
+    pip install areagiskit
+
+Or use the Python that ships with QGIS, or install GDAL for your system (e.g. apt install python3-gdal).
+More help: https://github.com/Praddy-GByte/areagiskit"""
+
+try:
+    from .core.aoi import AOI
+    from .core.data import KitError
+    from .kits import all_kits, get
+except ModuleNotFoundError as exc:          # GDAL missing: explain instead of printing a traceback
+    if exc.name != "osgeo":
+        raise
+    AOI = KitError = all_kits = get = None
 
 
 def _utf8_console():
@@ -28,6 +43,9 @@ def _utf8_console():
 
 def main(argv=None):
     _utf8_console()
+    if AOI is None:
+        print(GDAL_HELP, file=sys.stderr)
+        return 2
     ap = argparse.ArgumentParser(prog="areagiskit")
     ap.add_argument("kit")
     ap.add_argument("params", nargs="*", help="name=value")

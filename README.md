@@ -216,6 +216,18 @@ Code: GNU GPL v3.0 or later, with additional terms in `NOTICE`: keep the author 
 versions as changed, and do not use the name "AreaGIS Kit" or its icons for a modified version.
 Data: see `DATA_LICENSES.md` (RWI, GEM and Open-Meteo data are non-commercial).
 
+## Python package
+
+The engine and command line (no QGIS needed) are also available from PyPI. AreaGIS Kit needs GDAL's Python
+bindings; with conda:
+
+```
+conda create -n areagis -c conda-forge python=3.12 gdal numpy matplotlib scipy
+conda activate areagis
+pip install areagiskit
+areagiskit list
+```
+
 ## How to cite
 
 Kaushik, P. (2026). AreaGIS Kit: one-click geospatial studies for QGIS and ArcGIS Pro [Software].
