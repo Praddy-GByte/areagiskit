@@ -18,6 +18,64 @@
 `AreaGIS_Kit_for_ArcGIS_Pro.zip` is the ArcGIS Pro toolbox. Single-kit QGIS zips are also there for anyone who wants just one.
 Problems or suggestions: [open an issue](https://github.com/Praddy-GByte/areagiskit/issues).
 
+## Quick start
+
+### Python
+
+```python
+from areagiskit.core.aoi import AOI
+from areagiskit.kits import get
+
+area = AOI(bbox=[67.6, 26.6, 67.9, 26.85], name="Dadu, Sindh")      # lon_min, lat_min, lon_max, lat_max
+kit = get("floodstudy")()
+result = kit.run(area, {"event_date": "2022-09-03"}, "out/dadu")
+
+print(result["summary"])                  # key numbers in one line
+print(result["verdict"]["level"])         # confidence grade: High / Medium / Low
+print(result["report"])                   # out/dadu/report.html (also report.docx and report.pdf)
+```
+
+To use your own boundary instead of a box, pass its outline as WKT in longitude/latitude (EPSG:4326):
+
+```python
+from osgeo import ogr
+geom = ogr.Open("district.gpkg").GetLayer(0).GetNextFeature().GetGeometryRef()   # a layer in EPSG:4326
+area = AOI(wkt=geom.ExportToWkt(), name="My district")
+```
+
+The six studies: `floodstudy`, `lulc`, `landslide`, `cropstudy`, `urbanstudy`, `healthstudy`.
+
+### Command line
+
+```bash
+areagiskit list                           # every study and all its options
+
+areagiskit floodstudy  --bbox 67.6 26.6 67.9 26.85     --name "Dadu, Sindh" event_date=2022-09-03 --out out/
+areagiskit landslide   --bbox 76.08 11.43 76.22 11.56  --name "Wayanad"     event_date=2024-07-30 --out out/
+areagiskit lulc        --bbox 76.98 28.40 77.08 28.48  --name "Gurugram"    years=2005,2015,2025  --out out/
+areagiskit cropstudy   --bbox -88.75 36.62 -88.65 36.70 --name "Graves County" start=2021-01-01  --out out/
+areagiskit urbanstudy  --bbox 76.98 28.40 77.10 28.50  --name "Gurugram"    year=2024 hot_months=4,5,6 --out out/
+areagiskit healthstudy areas=wards.gpkg id_field=ward_id cases_field=cases population_field=pop --out out/
+```
+
+Each run writes `report.html`, `report.docx` and `report.pdf`, plus GeoTIFF and CSV results, in its output folder.
+
+### QGIS and ArcGIS Pro
+
+- **QGIS:** Plugins › Manage and Install Plugins › Install from ZIP › `areagiskit.zip`. Open a study from the
+  **AreaGIS Kit** toolbar button or the Processing Toolbox, choose the area, press **Run**.
+- **ArcGIS Pro:** unzip `AreaGIS_Kit_for_ArcGIS_Pro.zip`, then Catalog › Toolboxes › Add Toolbox › `AreaGIS Kit.pyt`.
+
+### Install the Python package
+
+```bash
+conda create -n areagis -c conda-forge python=3.12 gdal numpy matplotlib scipy
+conda activate areagis
+pip install areagiskit
+```
+
+Full guide, every analysis and the data sources: **https://praddy-gbyte.github.io/areagiskit/**
+
 AreaGIS Kit brings data acquisition, standard analyses, independent validation, confidence grading and reproducible
 reporting into one run. Pick an area, fill in one or two options and press **Run**. Each kit fetches its own open data
 (no account, no manual download), runs the standard analyses for its field, checks its results against independent
