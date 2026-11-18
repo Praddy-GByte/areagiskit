@@ -1,6 +1,6 @@
 <p align="center"><img src="assets/logo/areagiskit_logo_light.png" alt="AreaGIS Kit" width="560"></p>
 <p align="center">
-<a href="https://pypi.org/project/areagiskit/"><img src="https://img.shields.io/pypi/v/areagiskit?label=pypi&color=e67e22" alt="PyPI"></a>
+<a href="https://pypi.org/project/areagiskit/"><img src="https://img.shields.io/pypi/v/areagiskit?label=pypi&color=e67e22&cacheSeconds=3600" alt="PyPI"></a>
 <a href="https://doi.org/10.5281/zenodo.24326878"><img src="https://img.shields.io/badge/DOI-10.5281%2Fzenodo.24326878-1f6fb2" alt="DOI 10.5281/zenodo.24326878"></a>
 <a href="https://github.com/Praddy-GByte/areagiskit/actions/workflows/tests.yml"><img src="https://github.com/Praddy-GByte/areagiskit/actions/workflows/tests.yml/badge.svg" alt="tests"></a>
 <a href="LICENSE"><img src="https://img.shields.io/badge/code-GPL--3.0--or--later-2e9e6a" alt="Code licence GPL-3.0-or-later"></a>
